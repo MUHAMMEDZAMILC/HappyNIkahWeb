@@ -28,6 +28,11 @@ class HappyAdminservice extends CI_Controller {
 	    echo  $this->Happyadminservicemodel->Testx();
 	    
 	}
+	public function LoginStaffid(){
+	   
+	    $this->load->model("Happyadminservicemodel");
+	    echo  $this->Happyadminservicemodel->LoginStaff();
+	}
 	public function AdsManagement(){
 	    
 	    $this->load->model("Happyadminservicemodel");

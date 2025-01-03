@@ -14,24 +14,44 @@ class Happyadminservicemodel extends CI_Model {
         echo "hiiiiiii";
     }
 
-    // login user 
-    public function LoginUser(){
+    public function LoginStaff()
+    {
         error_reporting(0);
         ini_set('display_errors', '1');
-        $json = file_get_contents('php://input');
+        $json = file_get_contents(filename: 'php://input');
         $data = json_decode($json, true);
-        $this->db->select("*");
+        $this->db->select("emp_id,usertype_id");
         $this->db->from("tbl_employees1");
-        $this->db->where("username",$data['username']);
-        $this->db->where("password",$data['password']);
+        $this->db->where("username", $data['username']);
+        $this->db->where("password", $data['password']);
+        // $this->db->where("usertype_id", $data['usertype']);
+        // $this->db->where("deleted", 0);
         $query = $this->db->get();
         $json = array();
         if ($query->num_rows() > 0) {
             $json = $query->row_array();
-            $json["status"] = "1";
+            if($json['deleted'] == 1){
+                $json["emp_id"] = 0;
+                $json["usertype_id"] = 0;
+                $json["error"] = true;
+                $json["msg"] = "Your Account is Deleted";
+            }else if($json['usertype_id'] != $data['usertype'] ){
+                $json["emp_id"] = 0;
+                $json["usertype_id"] = 0;
+                $json["error"] = true;
+                $json["msg"] = "You are not authorized to login";
+            }else{
+                $json['emp_id'] = (int)$json['emp_id']; // Cast to integer
+                $json['usertype_id'] = (int)$json['usertype_id']; // Cast to integer
+                $json["error"] = false;
+                $json["msg"] = "Successfully Login";
+            }
+            
         } else {
+            $json["emp_id"] = 0;
+            $json["usertype_id"] = 0;
             $json["error"] = true;
-            $json["error_msg"] = "Data Not Found";
+            $json["msg"] = "Invalid Username or Password";
         }
         return json_encode($json);
     }
@@ -623,24 +643,6 @@ class Happyadminservicemodel extends CI_Model {
                     array("id"=>"5","value"=>"Money Exchange"),
                     array("id"=>"6","value"=>"Free Activation")
                 ];
-                return json_encode($json);
-            }
-            // get staff type
-            else if ($mode == 31) {
-                $json = array();
-                $json["error"] = false;
-                $json["error_msg"] = "";
-                $this->db->select("usertype_id id, user_type value");
-                $this->db->where("status",1);
-                $this->db->from("tbl_usertype");
-                $query = $this->db->get();
-        
-                if ($query->num_rows() > 0) {
-                    $json["data"] = $query->result_array();
-                } else {
-                    $json["error"] = true;
-                    $json["error_msg"] = "Data Not Found";
-                }
                 return json_encode($json);
             }
         }
