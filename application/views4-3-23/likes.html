@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <title>Go To Nikah</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Roboto:wght@400;@500&display=swap" rel="stylesheet"> 
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="user">
+    <section id="userHeader">
+        <div class="topbar">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-sm-6 mb-4 mb-sm-0 d-none d-lg-flex align-items-center justify-content-center justify-content-sm-start">
+                        <a class="" href="home.html">
+                            <img src="images/logo.png" alt="Go to Nikah" width="auto" height="auto" class="gotoNikahlogo">
+                        </a>
+                    </div>
+                    <div class="col-12 col-lg-6 d-flex justify-content-end align-items-center">
+                        <ul class="dwnIcon d-flex">
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <img src="images/appleStore.png" alt="appleStore" class="storeIcon me-3" width="auto" height="auto">
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <img src="images/playStore.png" alt="playStore" class="storeIcon" width="auto" height="auto">
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand d-lg-none" href="home.html"><img src="images/logoW.png" alt="Go to Nikah" width="auto" height="auto" class="gotoNikahlogo"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarGoToNikah" aria-controls="navbarGoToNikah" aria-expanded="false" aria-label="Toggle navigation">
+                    <div class="hamburger" id="hamburger-1">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                    </div>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarGoToNikah">
+                    <ul class="navbar-nav mb-4 mb-lg-0 mt-3 mt-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="home.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="featuredProfiles.html">Featured Profiles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="upgradeToPremium.html">Upgrade To Premium</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="help.html">Help</a>
+                        </li>
+                    </ul>
+                    <ul class="d-flex notMenu align-items-center mb-3 mb-lg-0 ms-auto">
+                        <li>
+                            <a href="chat.html" class="chatBox">
+                                <img src="images/comment.png" alt="chat" width="auto" height="auto">
+                                <span>
+                                    <label>5</label>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" id="notifctnDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="images/notification.png" alt="notification" width="auto" height="auto" class="notificationIcon">
+                                    <span class="notificationCount">
+                                        <label>4</label>
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="notifctnDropdown">
+                                    <li class="d-flex justify-content-between notfctnItems">
+                                        <span class="me-3">Lorem ipsum dolor </span>
+                                        <span class="d-flex justify-content-between">
+                                            <a href="javascript:void(0);"><img src="images/cancel.png" alt="cancel" class="me-2"></a>
+                                            <a href="javascript:void(0);"><img src="images/checked.png" alt="checked"></a>
+                                        </span>
+                                    </li>
+                                    <li class="d-flex justify-content-between notfctnItems">
+                                        <span class="me-3">Lorem ipsum dolor </span>
+                                        <span class="d-flex justify-content-between">
+                                            <a href="javascript:void(0);"><img src="images/cancel.png" alt="cancel" class="me-2"></a>
+                                            <a href="javascript:void(0);"><img src="images/checked.png" alt="checked"></a>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" id="myAccountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="images/user.png" class="userIcon" alt="user">
+                                    My Account
+                                </button>
+                                <ul class="dropdown-menu  dropdown-menu-lg-end" aria-labelledby="myAccountDropdown">
+                                    <li class="accntDropList">
+                                        <a class="dropdown-item" href="editProfile.html">
+                                            <div class="d-flex">
+                                                <div class="profImgBox">
+                                                    <img src="images/profDummy.png">
+                                                </div>
+                                                <div class="nameTitle">
+                                                    <p>Ayisha Nilopher</p>
+                                                    <span>
+                                                        <img src="images/verify.png">
+                                                        Verified
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="accntDropList">
+                                        <a class="dropdown-item" href="editProfile.html">
+                                            <img src="images/userEdit.png">
+                                            Edit Profile
+                                        </a>
+                                    </li>
+                                    <li class="accntDropList">
+                                        <a class="dropdown-item" href="changePassword.html">
+                                            <img src="images/padlock.png">
+                                            Change Password
+                                        </a>
+                                    </li>
+                                    <li class="accntDropList">
+                                        <a class="dropdown-item" href="index.html">
+                                            <img src="images/logout.png">
+                                            Logout
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <section id="userContent">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="profileBox">
+                        <div class="bgStrip">
+                            <img src="images/abstractBg1.png" alt="border image">
+                        </div>
+                        <div class="profileImgBox text-center">
+                            <img src="images/profDummy.png" alt="profile image" class="proImg1">
+                            <div class="proChangeWrapper">
+                                <button class="btn">
+                                    <img src="images/prCngIco.png" alt="profile image">
+                                </button>
+                                <input type="file" name="myfile" />
+                            </div>
+                        </div>
+                        <div class="nameTitle text-center mb-4">
+                            <p>Ayisha Nilopher</p>
+                            <span>
+                                <img src="images/verify.png">
+                                Verified
+                            </span>
+                        </div>
+                        <button type="button" class="upgrdPrmBtn">
+                            <img src="images/crown.png">
+                            Upgarde to Premium
+                        </button>
+                    </div>
+                    <div class="profBalence">
+                        <div class="d-flex justify-content-between balenceHead">
+                            <span class="head">Your Credit Balance :</span>
+                            <button type="button" class="upgrdBtn">
+                                <img src="images/crown.png">
+                                Upgarde to Premium
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6 d-flex align-items-stretch mb-3 mb-md-0">
+                                <div class="balenceBox blBlue d-flex justify-content-between">
+                                    <div class="d-flex flex-column justify-content-between">
+                                        <p>Personal Messages :</p>
+                                        <h3>200</h3>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/animation_500_kzxr10w6.gif">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 d-flex align-items-stretch">
+                                <div class="balenceBox bdBlue d-flex justify-content-between">
+                                    <div class="d-flex flex-column justify-content-between">
+                                        <p>View Profile :</p>
+                                        <h3>30</h3>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <img src="images/animation_500_kzxr3da6.gif">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profMenu mb-4">
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <a href="home.html">
+                                    <div class="d-flex justify-content-center align-items-center profMenuBox profMenuBox1">
+                                        <img src="images/profileIcon.png">
+                                        <span>Profile</span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <a href="search.html">
+                                    <div class="d-flex justify-content-center align-items-center profMenuBox profMenuBox2">
+                                        <img src="images/search.png">
+                                        <span>Search</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <a href="explore.html">
+                                    <div class="d-flex justify-content-center align-items-center profMenuBox profMenuBox3">
+                                        <img src="images/explore.png">
+                                        <span>Explore</span>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <a href="chat.html">
+                                    <div class="d-flex justify-content-center align-items-center profMenuBox profMenuBox4">
+                                        <img src="images/msgIcon.png">
+                                        <span>Messages</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="enrollBox mb-5">
+                        <img src="images/enrollImg.jpg" class="enrollImg">
+                        
+                        <div class="contentBox">
+                            <p class="enrollPara">Enroll for the assisted services &amp; enjoy personalized matchmaking</p>
+                            <button type="button" class="enrollBtn">Enroll Now</button>
+                        </div>
+                    </div>
+                    <!-- mobile app advrtisment -->
+                    <div class="appAdvBox2">
+                        <h2 class="subHead mb-4">Search Profiles<br><span>Anytime! Anywhere!!</span></h2>
+                        <p class="pOne">Finding your perfect match has never been easier with the Gotonikah application</p>
+                        <p class="pTwo">Download now and communicate with muslim matches on-the-go!</p>
+                        <img src="images/appMob.png" class="mobAppIcon">
+                        <div class="row">
+                            <div class="col-6 col-sm-6 d-flex align-items-center justify-content-center">
+                                <a href="javascript:void(0)">
+                                    <img src="images/appleStore.png" alt="appleStore" class="storeIcon" width="auto" height="auto">
+                                </a>
+                            </div>
+                            <div class="col-6 col-sm-6 d-flex align-items-center justify-content-center">
+                                <a href="javascript:void(0)">
+                                    <img src="images/playStore.png" alt="playStore" class="storeIcon" width="auto" height="auto">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-7 col-lg-8">
+                    <!-- search -->
+                    <div class="searchBox">
+                        <form class="customForm">
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                                    <label class="form-label">I'm looking for</label>
+                                    <select class="form-select form-control" aria-label="">
+                                        <option value="1">Women</option>
+                                        <option value="2">Man</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                                    <label class="form-label">Aged</label>
+                                    <select class="form-select form-control" aria-label="">
+                                        <option value="1">20-25</option>
+                                        <option value="2">25-30</option>
+                                        <option value="2">30-35</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                                    <label class="form-label">Belief</label>
+                                    <select class="form-select form-control" aria-label="">
+                                        <option value="1">Sunni</option>
+                                        <option value="2">18</option>
+                                        <option value="2">19</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                                    <label class="form-label" style="opacity:0;">I'm looking for</label>
+                                    <button type="button" class="btn cstmBtnColr w-100" onclick="window.location.href='search.html'"><img src="images/search.png"><span>Search</span></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                   
+                    <!-- profile listing -->
+                    <div class="profileListBox plbTrasprnt">
+                        <div class="row">
+                            <div class="col-12 d-flex align-items-center mb-4">
+                                <h5 class="listTypeHead">Liked your profile <span></span>20+</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile1.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class="online"></span>Online</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile2.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class=""></span>Offline</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile3.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class="online"></span>Online</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile4.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class="online"></span>Online</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile5.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class="online"></span>Online</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile6.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class=""></span>Offline</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-12 col-lg-6 col-xl-4">
+                                <a href="singleProfile.html">
+                                    <div class="proLstBox">
+                                        <img src="images/mProfile7.png" alt="profile image" class="proImg">
+                                        <div class="overlay"></div>
+                                        <div class="contentBox">
+                                            <p class="status"><span class=""></span>Offline</p>
+                                            <div class="d-flex mb-2">
+                                                <div class="flex-shrink-0">
+                                                    <img src="images/name.png" alt="name" class="profileico" width="auto" height="auto">
+                                                </div>
+                                                <div class="flex-grow-1 ms-2">
+                                                    <span class="proDtls">Aneesa N</span>
+                                                    <span class="proDtls">25 Yrs, 5' 0"</span>
+                                                    <span class="proDtls">Accounting Professional</span>
+                                                    <span class="proDtls">Other, Sunni</span>
+                                                    <span class="proDtls">Tirur, Malappuram</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <button class="chatBtn me-2" type="button" onclick="window.location.href='chat.html'">
+                                                    <img src="images/chat-bubbles.png">
+                                                    Chat
+                                                </button>
+                                                <button class="sndrqst" type="button">
+                                                    <img src="images/checked.png">
+                                                    Send Request
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-lg-flex justify-content-end">
+                            <div class="paginationPBox d-lg-flex align-items-center mb-5">
+                                <span class="resCount mb-4 mb-lg-0">Results: 10 - 17 of 128</span>
+                                <nav data-pagination class="navPagntn me-3 mb-4 mb-lg-0">
+                                  <a href=# disabled><img src="images/chevron-l.png"></a>
+                                  <ul>
+                                    <li class=current><a href=#1>1</a>
+                                    <li><a href=#2>2</a>
+                                    <li><a href=#3>3</a>
+                                    <li><a href=#4>4</a>
+                                    <li><a href=#5>5</a>
+                                    <li><a href=#10>…</a>
+                                    <li><a href=#41>41</a>
+                                  </ul>
+                                  <a href=#2><img src="images/chevron-r.png"></a>
+                                </nav>
+                                <select class="form-select itmPerPageSlct" aria-label="Default select example">
+                                    <option selected>10</option>
+                                    <option value="1">20</option>
+                                    <option value="2">50</option>
+                                    <option value="3">100</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- enroll button -->
+                    <div class="enrollBox2 mb-5 d-sm-flex d-md-block d-lg-flex align-items-stretch">
+                        <div class="contentBox">
+                            <p class="enrollPara">Enroll for the assisted services &amp; enjoy personalized matchmaking</p>
+                            <button type="button" class="enrollBtn">Enroll Now</button>
+                        </div>
+                        <div class="imgBox">
+                            <img src="images/enrollImg.jpg" class="enrollImg d-sm-none d-md-block d-lg-none">
+                            <img src="images/enrollImg.png" class="enrollImg d-none d-sm-block d-md-none d-lg-block">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="userFooter">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="at">© 2022 gotonikah All Rights Reserved</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    
+
+    <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // burger menu
+            $(".hamburger").click(function(){
+                $(this).toggleClass("is-active");
+                $('body').toggleClass("is-scroll-disabled");
+            });
+            // burger menu end
+
+            // send request btn
+            $(".sndrqst").click(function(){
+                $(this).toggleClass("clicked");
+            });
+            
+        });
+        
+    </script>
+
+</body>
+</html>

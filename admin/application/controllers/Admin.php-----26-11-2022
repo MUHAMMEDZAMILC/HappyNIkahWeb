@@ -1,0 +1,722 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Admin extends CI_Controller {
+
+	function __construct() {
+        parent::__construct();
+        $this->load->library('session');
+        $this->load->helper('url');
+        $this->load->database();
+        $this->load->model('General_Model');
+        
+        
+       
+        
+    }
+    
+    public function index()
+	{
+		$this->load->view('admin/login');
+	}
+
+	public function logaction(){
+
+  	$user = $this->input->post('username');
+  	$password = md5($this->input->post('password'));
+  	$res = $this->General_Model->login($user, $password);
+    if($res != 'failure'){
+ 
+    	$_SESSION['user_id_admin'] = $res['user_id'];
+    	$_SESSION['username'] = $res['username'];
+        $_SESSION['user_type'] = $res['user_type'];
+    	redirect('admin/dashboard');
+
+    }else{
+    	redirect('admin?error=1');
+    }
+
+   }
+
+   public function dashboard(){
+        $data['all'] = count($this->General_Model->GetFullData($table = "tbl_registration"));
+        $data['pending'] = count($this->General_Model->GetFullData($table = "tbl_registration",'status','0'));
+        $data['approved'] = count($this->General_Model->GetFullData($table = "tbl_registration",'status','1'));
+        $data['rejected'] = count($this->General_Model->GetFullData($table = "tbl_registration",'status','2'));
+        // $data['deactivated'] = count($this->General_Model->GetFullData($table = "tbl_registration",'status','3'));
+        $data['deleted'] = count($this->General_Model->GetFullData($table = "tbl_registration",'status','3'));
+        
+        $where_male = array('gender'=>'1','status'=>'1');
+        $data['male'] = count($this->General_Model->GetFullData1("tbl_registration",$where_male));
+        
+        $where_female = array('gender'=>'2','status'=>'1');
+        $data['female'] = count($this->General_Model->GetFullData1("tbl_registration",$where_female));
+        
+        $data['website'] = count($this->General_Model->GetFullData($table = "tbl_registration",'reg_through','0'));
+        $data['admin'] = count($this->General_Model->GetFullData($table = "tbl_registration",'reg_through','1'));
+        $data['mobile'] = count($this->General_Model->GetFullData($table = "tbl_registration",'reg_through','2'));
+        
+        $data['daily_all'] = count($this->General_Model->GetFullData($table = "tbl_registration",'reg_date',date('Y-m-d')));
+        $where1 = array('status'=>'0','reg_date'=>date('Y-m-d'));
+        $data['daily_pending'] = count($this->General_Model->GetFullData1("tbl_registration",$where1));
+        $where2 = array('status'=>'1','reg_date'=>date('Y-m-d'));
+        $data['daily_approved'] = count($this->General_Model->GetFullData1("tbl_registration",$where2));
+        $where3 = array('status'=>'2','reg_date'=>date('Y-m-d'));
+        $data['daily_rejected'] = count($this->General_Model->GetFullData1("tbl_registration",$where3));
+        // $where4 = array('status'=>'3','reg_date'=>date('Y-m-d'));
+        // $data['daily_deactivated'] = count($this->General_Model->GetFullData1("tbl_registration",$where4));
+        $where5 = array('status'=>'3','reg_date'=>date('Y-m-d'));
+        $data['daily_deleted'] = count($this->General_Model->GetFullData1("tbl_registration",$where5));
+        $where6 = array('gender'=>'1','reg_date'=>date('Y-m-d'),'status'=>'1');
+        $data['daily_male'] = count($this->General_Model->GetFullData1("tbl_registration",$where6));
+        $where7 = array('gender'=>'2','reg_date'=>date('Y-m-d'),'status'=>'1');
+        $data['daily_female'] = count($this->General_Model->GetFullData1("tbl_registration",$where7));
+        $where8 = array('reg_through'=>'0','reg_date'=>date('Y-m-d'));
+        $data['daily_website'] = count($this->General_Model->GetFullData1("tbl_registration",$where8));
+        $where9 = array('reg_through'=>'1','reg_date'=>date('Y-m-d'));
+        $data['daily_admin'] = count($this->General_Model->GetFullData1("tbl_registration",$where9));
+        $where10 = array('reg_through'=>'2','reg_date'=>date('Y-m-d'));
+        $data['daily_mobile'] = count($this->General_Model->GetFullData1("tbl_registration",$where10));
+        
+        $this->load->view('admin/dashboard',$data);
+   }
+ 
+   public function register($page = ''){  
+
+        if($page == 'Register'){ 
+            
+            
+            
+            //$UserDetails['profile_for'] = $this->validate($this->input->post('created_by'));
+            $UserDetails['profile_for'] = !empty($this->input->post('created_by'))?$this->input->post('created_by'):'NULL';
+            $UserDetails['name'] = !empty($this->input->post('name'))?$this->input->post('name'):'NULL';
+            $UserDetails['gender'] = !empty($this->input->post('gender'))?$this->input->post('gender'):'NULL';
+            $UserDetails['phone'] = !empty($this->input->post('phone'))?$this->input->post('phone'):'NULL';
+            $UserDetails['mail'] = !empty($this->input->post('email'))?$this->input->post('email'):'NULL';
+            $UserDetails['age'] = !empty($this->input->post('age'))?$this->input->post('age'):'NULL';
+            $UserDetails['height'] = !empty($this->input->post('height'))?$this->input->post('height'):'NULL';
+            $UserDetails['weight'] = !empty($this->input->post('weight'))?$this->input->post('weight'):'NULL';
+            $UserDetails['color'] = !empty($this->input->post('color'))?$this->input->post('color'):'NULL';
+            $UserDetails['marital_status'] = !empty($this->input->post('marital_status'))?$this->input->post('marital_status'):'NULL';
+            $UserDetails['physical_status'] = !empty($this->input->post('physical_status'))?$this->input->post('physical_status'):'NULL';
+            $UserDetails['mother_tongue'] = !empty($this->input->post('mother_tongue'))?$this->input->post('mother_tongue'):'NULL';
+            $UserDetails['blood_group'] = !empty($this->input->post('blood_group'))?$this->input->post('blood_group'):'NULL';
+            $UserDetails['religion'] = 2;
+            $UserDetails['caste'] = !empty($this->input->post('belief'))?$this->input->post('belief'):'NULL';
+            $UserDetails['address'] = !empty($this->input->post('address'))?$this->input->post('address'):'NULL';
+            $UserDetails['native_place'] = !empty($this->input->post('city'))?$this->input->post('city'):'NULL';
+            $UserDetails['pincode'] = $this->input->post('pincode');
+            $UserDetails['native_district'] = !empty($this->input->post('district'))?$this->input->post('district'):'NULL';
+            $UserDetails['other_contact_number'] = $this->input->post('othercontactno');
+            $UserDetails['education'] = !empty($this->input->post('qualification'))?$this->input->post('qualification'):'NULL';
+            $UserDetails['occupation'] = !empty($this->input->post('job'))?$this->input->post('job'):'NULL';
+            $UserDetails['job_category'] = !empty($this->input->post('job_status'))?$this->input->post('job_status'):'NULL';
+            $UserDetails['annual_income'] = !empty($this->input->post('annual_income'))?$this->input->post('annual_income'):'NULL';
+            $UserDetails['registration_hobbies'] = !empty($this->input->post('hobbies'))?$this->input->post('hobbies'):'NULL';
+            $UserDetails['photo_visibility'] = !empty($this->input->post('photo_visibility'))?$this->input->post('photo_visibility'):'NULL';
+            $UserDetails['photopassword'] = !empty($this->input->post('photopassword'))?$this->input->post('photopassword'):'0';
+
+            if($this->input->post('showtoexpress') == "on")
+            {
+              $UserDetails['showtoexpress'] = '1';
+            }
+            else
+            {
+              $UserDetails['showtoexpress'] = '0';
+            }
+
+            if($this->input->post('showtopremium') == "on")
+            {
+              $UserDetails['showtopremium'] = '1';
+            }
+            else
+            {
+              $UserDetails['showtopremium'] = '0';
+            }
+            
+            $UserDetails['reg_date'] = date('Y-m-d');
+            $UserDetails['staff_id'] = $this->session->userdata('user_id_admin');
+            $UserDetails['about'] = "I'm ".$UserDetails['name'].". I'm ".$UserDetails['age']." Years old";
+            $UserDetails['status'] = "1";
+            $UserDetails['reg_through'] = "1";
+            $FamilyDetails['fathers_name'] = !empty($this->input->post('fathers_name'))?$this->input->post('fathers_name'):'NULL';
+            $FamilyDetails['fathers_occupation'] = !empty($this->input->post('father_occupation'))?$this->input->post('father_occupation'):'NULL';
+            $FamilyDetails['mothers_name'] = !empty($this->input->post('mothers_name'))?$this->input->post('mothers_name'):'NULL';
+            $FamilyDetails['mothers_occupation'] = !empty($this->input->post('mother_occupation'))?$this->input->post('mother_occupation'):'NULL';
+            $FamilyDetails['total_members'] = !empty($this->input->post('no_of_family_members'))?$this->input->post('no_of_family_members'):'NULL';
+            $FamilyDetails['financial_status'] = !empty($this->input->post('financial_status'))?$this->input->post('financial_status'):'NULL';
+            $PartnerDetails['partner_age_from'] = !empty($this->input->post('age_from'))?$this->input->post('age_from'):'NULL';
+            $PartnerDetails['partner_age_to'] = !empty($this->input->post('age_to'))?$this->input->post('age_to'):'NULL';
+            $PartnerDetails['partner_height'] = !empty($this->input->post('height_preference_from'))?$this->input->post('height_preference_from'):'NULL';
+            $PartnerDetails['partner_height_to'] = !empty($this->input->post('height_preference_to'))?$this->input->post('height_preference_to'):'NULL';
+            $PartnerDetails['partner_education'] = !empty($this->input->post('qualification_preference'))?$this->input->post('qualification_preference'):'NULL';
+            $PartnerDetails['partner_familytype'] = !empty($this->input->post('family_type_preference'))?$this->input->post('family_type_preference'):'NULL';
+            $PartnerDetails['partner_expectation'] = !empty($this->input->post('expectations'))?$this->input->post('expectations'):'NULL';
+            $submit_value = $this->input->post('submit');
+            if($submit_value == 'Save User Details'){
+                $checkexist = $this->db->select('*')->from('tbl_registration')->where('phone',$UserDetails['phone'])->where('status !=','3')->get()->num_rows();
+                if($checkexist == 0){
+                    $UserID = $this->General_Model->AddRecord('tbl_registration', $UserDetails);  
+                }else{   
+                    $this->session->set_flashdata('existing',$UserDetails['phone'].' is already registered!');
+                    redirect('admin/register');    
+                }
+                
+                $FamilyDetails['user_id'] = !empty($UserID)?$UserID:'NULL';
+                $PartnerDetails['user_id'] = !empty($UserID)?$UserID:'NULL';
+                $this->General_Model->AddRecord('tbl_familyprofile', $FamilyDetails);
+                $this->General_Model->AddRecord('tbl_otherdetails', $PartnerDetails);
+                
+                //password and otp sms
+                $happynikah_id = $this->General_Model->fetch_hnID($UserID)['happynikah_id'];
+                $password = 'happy'.rand(10,10000);
+                $loginDetails['username'] = $UserDetails['phone'];
+                $loginDetails['password'] = md5($password);
+                $loginDetails['user_id'] = $UserID;
+                $loginDetails['date'] = date('Y-m-d H:i:s');
+                $this->General_Model->AddRecord('tbl_userlogin', $loginDetails);
+                $msg =  'You%20have%20successfully%20initiated%20registration%20in%20happynikah.com.%20UserID:'.$happynikah_id.'%20Password:'.$password.'%0APlease%20login%20and%20complete%20your%20profile.SYSOL%20SYSTEM%20SOLUTIONS%20PRIVATE%20LIMITED';
+                $this->smsotp($msg,'91'.$UserDetails['phone']);
+            }
+            else{
+                $UserID = $this->input->post('userid');
+                // $this->General_Model->UpdateData($table = 'tbl_registration',$column_name = 'id',$UserID,$UserDetails);
+                // $this->General_Model->UpdateData($table = 'tbl_familyprofile',$column_name = 'user_id',$UserID,$FamilyDetails);
+                // $this->General_Model->UpdateData($table = 'tbl_otherdetails',$column_name = 'user_id',$UserID,$PartnerDetails);
+                
+                $this->General_Model->UpdateData($table = 'tbl_registration',$column_name = 'id',$UserID,$UserDetails);
+                $checkexistfam = $this->db->select('*')->from('tbl_familyprofile')->where('user_id',$UserID)->get()->num_rows();
+                if($checkexistfam == 0){
+                    $FamilyDetails['user_id'] = $UserID;
+                    $this->General_Model->AddRecord('tbl_familyprofile', $FamilyDetails);
+                }
+                else{
+                  $this->General_Model->UpdateData($table = 'tbl_familyprofile',$column_name = 'user_id',$UserID,$FamilyDetails);
+                }
+
+                $checkexistother = $this->db->select('*')->from('tbl_otherdetails')->where('user_id',$UserID)->get()->num_rows();
+                if($checkexistother == 0){
+                  $PartnerDetails['user_id'] = $UserID;
+                  $this->General_Model->AddRecord('tbl_otherdetails', $PartnerDetails);
+                }
+                else{
+                  $this->General_Model->UpdateData($table = 'tbl_otherdetails',$column_name = 'user_id',$UserID,$PartnerDetails);
+                }
+            }
+            
+            if ($UserID != "") {
+                $this->session->set_flashdata('added','Data!');
+               // $this->profilephoto($UserID);
+               redirect('admin/profilephoto/'.$UserID);
+            }
+            else{
+                $this->session->set_flashdata('error','Data!');
+                redirect('admin/register');
+            }
+
+        }   
+        else{
+            $data['Height'] = $this->General_Model->GetFullData($table = "tbl_height");
+            $data['weight'] = $this->General_Model->GetFullData($table = "tbl_weight"); 
+            $data['mothertongue'] = $this->General_Model->GetFullData($table = "tbl_mothertongue");
+            $data['belief'] = $this->General_Model->GetFullData($table = "tbl_subcaste");
+            $data['district'] = $this->General_Model->GetFullData($table = "tbl_district");
+            $data['qualification'] = $this->General_Model->GetFullData($table = "tbl_qualification");
+            $data['job'] = $this->General_Model->GetFullData($table = "tbl_jobs");
+            $this->load->view('admin/register',$data);  
+        }
+      
+   }
+   
+   function smsotp($msg,$mobile)
+   {
+      $url =  'http://sms.sysol.in/api/api.php?ver=1&mode=1&action=push_sms&type=1&route=2&login_name=Sysolsystemsolutions&api_password=9d61ac8866c76e24cdde&message='.$msg.'&number='.$mobile.'&sender=SYSOLS&template_id=1607100000000205213';
+        
+      file_get_contents($url);   
+      return 1;
+    }
+
+   public function GetHeight()
+   {
+        $HeightFrom = $this->input->post('HeightFrom');
+        $result = $this->General_Model->GetFullData('tbl_height','',$HeightFrom);
+        if ($result != "") {
+            $data1 = '<option value="">--Select--</option>';
+            for ($i = 0; $i < count($result); $i++) {
+                $data = '<option value = "' . $result[$i]->height_id . '" textvalue="' . $result[$i]->height . '">' . $result[$i]->height . '</option>';
+                if (empty($i)) {
+                    print_r($data1);
+                }
+                print_r($data);
+            }
+        }
+   }
+
+
+   public function profilephoto($userid){
+      $data['user_id'] = $userid;
+      $data['userimages']  = $this->General_Model->GetFullData('tbl_userimages','user_id',$userid);
+      $data['profilepic']  = $this->General_Model->GetFullData('tbl_registration','id',$userid);
+      $this->load->view('admin/uploadphoto',$data);
+
+   }
+
+   
+
+
+   public function uploadphoto(){
+        $imagevalue = $this->input->post('imagevalue');
+        $userid = $this->input->post('userid');
+        $picnum = $this->input->post('picnum');
+
+        if($picnum >= 3){
+          echo 0;
+        }
+        else{
+             
+          $imagenewname = $userid.mt_rand(1111,9999).date('Y-m-d').'.jpg';
+          $base64img = str_replace('data:image/jpeg;base64,', '', $_POST['imagevalue']);
+          $base64img = str_replace(' ', '+', $base64img);
+          $data = base64_decode($base64img);
+          $newfilename = '/home2/happynikah/public_html/assets/photo_storage/'.$imagenewname;
+          file_put_contents($newfilename, $data);
+          
+          //watermarking images
+          $watermarkImagePath = 'hn_wtrmark.png';
+          $watermarkImg = imagecreatefrompng('/home2/happynikah/public_html/assets/images/'.$watermarkImagePath); 
+          $im = imagecreatefromjpeg('/home2/happynikah/public_html/assets/photo_storage/'.$imagenewname);
+          
+          //blurring image
+          $this->blur_images($imagenewname,$imagevalue);
+          
+          // Set the margins for the watermark 
+          $marge_right = 10; 
+          $marge_bottom = 280; 
+           
+          // Get the height/width of the watermark image 
+          $sx = imagesx($watermarkImg); 
+          $sy = imagesy($watermarkImg); 
+          // Copy the watermark image onto our photo using the margin offsets and  
+          // the photo width to calculate the positioning of the watermark. 
+
+          imagecopy($im, $watermarkImg, imagesx($im) - $sx - $marge_right, imagesy($im) - $sy - $marge_bottom, 0, 0, imagesx($watermarkImg), imagesy($watermarkImg));
+           
+          // Save image and free memory 
+          imagepng($im, $newfilename); 
+          imagedestroy($im);
+       
+          $uploaddata = array(
+                    'user_id' => $userid,
+                    'user_image' => $imagenewname,
+                    'status'=>'2'
+          );
+          $this->General_Model->AddRecord('tbl_userimages',$uploaddata);
+          if($picnum == 0){
+              $data = array(
+                      'photo' => $imagenewname
+                      );
+              $this->General_Model->UpdateData('tbl_registration','id',$userid,$data);
+          }
+          echo 1;
+        }
+        
+        
+   }
+   
+   public function blur_images($imagenewname,$imagevalue)
+   {
+        $base64img = str_replace('data:image/jpeg;base64,', '', $imagevalue);
+        $base64img = str_replace(' ', '+', $base64img);
+        $data = base64_decode($base64img);
+        $newfilename = '/home2/happynikah/public_html/assets/photo_storage_blur/'.$imagenewname;
+        file_put_contents($newfilename, $data);
+        $watermarkImagePath = 'mask.png';
+        $watermarkImg = imagecreatefrompng('/home2/happynikah/public_html/assets/images/'.$watermarkImagePath); 
+        $im = imagecreatefromjpeg('/home2/happynikah/public_html/assets/photo_storage_blur/'.$imagenewname);
+        
+        for($i=0;$i<=100;$i++)
+        {
+            imagefilter($im, IMG_FILTER_GAUSSIAN_BLUR);
+            
+        }
+
+        $marge_right = 0; 
+        $marge_bottom = 0;
+        $sx = imagesx($watermarkImg); 
+        $sy = imagesy($watermarkImg);
+        imagecopy($im, $watermarkImg, imagesx($im) - $sx - $marge_right, imagesy($im) - $sy - $marge_bottom, 0, 0, imagesx($watermarkImg), imagesy($watermarkImg));
+        
+        imagejpeg($im, $newfilename);
+        imagedestroy($im);
+   }
+
+   public function setprofilepic(){
+        $image = $this->input->post('image');
+        $userid = $this->input->post('userid');
+        $data = array(
+                      'photo' => $image
+                      );
+        $this->General_Model->UpdateData('tbl_registration','id',$userid,$data);
+        echo 1;
+        
+        
+   }
+
+   public function deleteprofilepic(){
+        $image_id = $this->input->post('image_id');
+        $this->General_Model->DeleteData('tbl_userimages','user_image_id',$image_id);
+        echo 1;
+        
+        
+   }
+
+   public function users($status = ''){
+        $data['users'] = $this->General_Model->GetFullData('tbl_registration','status', $status);
+        
+        if($status == '0')
+        {
+          $data['page'] = "Total Pending Calls";
+          $data['users'] = $this->General_Model->GetFullData('tbl_registration','status', '0');
+        }
+        if($status == '1')
+        {
+          $data['page'] = "Approve Calls";
+        }
+        if($status == '2')
+        {
+          $data['page'] = "Rejected Calls";
+        }
+        if($status == '3')
+        {
+          $data['page'] = "Deleted Calls";
+          $data['users'] = $this->General_Model->GetFullData('tbl_registration','status', '3');
+        }
+        if($status == 'profile_approval')
+        {
+          $data['page'] = "Profile Approval";
+          $data['users'] = $this->General_Model->GetPendingcalls();
+        }
+        if($status == 'quick_calls'){
+          $data['page'] = "Quick Calls";
+          $data['users'] = $this->General_Model->GetQuickcalls();
+        }
+        
+        $data['status'] = $status;
+        $this->load->view('admin/users',$data);  
+   }
+
+   public function profile($type = '',$user_id = ''){
+        $data['ProfileDetails'] = $this->General_Model->GetProfileDetails($user_id);
+        
+        $data['user_id'] = $user_id;
+        if($type == 'view'){
+            $this->load->view('admin/profile',$data);
+        }
+        elseif ($type == 'edit') {
+            $data['Height'] = $this->General_Model->GetFullData($table = "tbl_height");
+            $data['weight'] = $this->General_Model->GetFullData($table = "tbl_weight"); 
+            $data['mothertongue'] = $this->General_Model->GetFullData($table = "tbl_mothertongue");
+            $data['belief'] = $this->General_Model->GetFullData($table = "tbl_subcaste");
+            $data['district'] = $this->General_Model->GetFullData($table = "tbl_district");
+            $data['qualification'] = $this->General_Model->GetFullData($table = "tbl_qualification");
+            $data['job'] = $this->General_Model->GetFullData($table = "tbl_jobs");
+            $this->load->view('admin/register',$data);
+        }
+        
+   }
+   
+   public function password_reset($type = '',$user_id = ''){
+            $this->load->view('admin/password_reset');
+        
+   }
+   
+   public function reset($type = '',$user_id = ''){
+        $input = $this->input->post('mobile');
+        $userid  = $this->General_Model->GetUserId($input);
+        
+        $user_id = $userid['id'];
+        $data['password'] = md5($this->input->post('password'));
+        $check = $this->General_Model->check_user_id($user_id);
+        if($check == 0)
+        {
+            $loginDetails['username'] = $input;
+            $loginDetails['password'] = md5($this->input->post('password'));
+            $loginDetails['user_id'] = $user_id;
+            $loginDetails['date'] = date('Y-m-d H:i:s');
+            $this->General_Model->AddRecord('tbl_userlogin', $loginDetails);  
+        }
+        else
+        {
+          $this->General_Model->UpdateData($table = 'tbl_userlogin',$column_name = 'user_id',$user_id,$data);
+        }
+        
+        $this->session->set_flashdata('added','Data!');
+        $this->load->view('admin/password_reset');
+        
+   }
+
+   public function change_status()
+    {
+      $status = $this->input->post('status');
+      $old_status = $this->input->post('old_status');
+      $id = $this->input->post('id');
+      $comment = $this->input->post('comment');
+      
+      if($status == '1')
+      {
+        $checkphone = $this->db->select('phone')->from('tbl_registration')->where('id',$id)->get()->row_array()['phone'];
+        // echo $checkphone;
+        $checkexist = $this->db->select('*')->from('tbl_registration')->where('phone',$checkphone)->where('status !=','3')->get()->num_rows();
+        // echo $checkexist;
+        if($checkexist <= 1){
+            $data=array('status'=>$status);
+            // echo "sts:".$status;die;
+            $this->General_Model->UpdateData($table = 'tbl_registration',$column_name = 'id',$id,$data);   
+        }else{   
+            $this->session->set_flashdata('existing',$checkphone.' is already registered!');
+            redirect('admin/profile/edit/'.$id);   
+        }
+      }
+      else
+      {
+          $data=array('status'=>$status);
+          $this->General_Model->UpdateData($table = 'tbl_registration',$column_name = 'id',$id,$data);
+      }
+      
+      //echo $this->db->last_query(); exit;
+      $log_data = array(
+                  'admin_id' => $this->session->userdata('user_id_admin'),
+                  'activity' => 'Chnaged status of user with user id '.$id. ' to '.$status,
+                  'log_desc' => $comment,
+                  'log_date' => date('d-m-Y H:i:s'),
+      );
+      $this->General_Model->AddRecord($table = 'tbl_adminlog',$data = $log_data);
+  
+
+      redirect('admin/users/'.$old_status);
+ 
+    }
+
+    public function logout() {
+        $this->session->unset_userdata("user_id_admin");
+        $this->session->unset_userdata("username");
+        $this->session->unset_userdata("user_type");
+        redirect('admin/index');
+    }
+    
+    
+    // function delete_profile($id){
+        
+    //   $this->General_Model->UpdateData('tbl_registration','id',$id);
+    //   $data = array(
+    //                   'status' => '3'
+    //                   );
+    //   $this->General_Model->UpdateData('tbl_registration','id',$id,$data);
+       
+    //   redirect($_SERVER['HTTP_REFERER']);
+        
+    // }
+    
+    function delete_profile($id){
+       $data = array('status' => '3');
+       $this->General_Model->UpdateData('tbl_registration','id',$id,$data);
+       redirect($_SERVER['HTTP_REFERER']);
+        
+    }
+    
+    public function search_profiles()
+    {
+    
+      $search_profile = $this->input->post('search_profile');
+      if($search_profile != ""){
+        $data['get_search_profiles'] = $this->General_Model->search_profiles($search_profile);
+      }
+
+      
+      $data['plan'] = $this->General_Model->GetFullData($table = "tbl_plan");
+      $this->load->view('admin/search_profiles',$data);
+    }
+
+    public function approve_pay()
+    {
+      $user_id = $this->input->post('r_id');
+
+      $where = array('user_id'=>$user_id,'status'=>'1');
+      $current_plan = $this->General_Model->GetFullData1_payement('tbl_payement',$where);
+      $plan = $this->General_Model->GetFullData($table = "tbl_plan");
+      
+      $html='<div class="form-group">';
+      
+      foreach($current_plan as $val){
+        $where = array('sender_id'=>$user_id,'planid'=>$current_plan[0]->id);
+        $contact_viewed = $this->General_Model->GetFullData1('tbl_contact_viewed',$where);
+
+        $where1 = array('sender_id'=>$user_id,'planid'=>$current_plan[0]->id);
+        $message_viewed = $this->General_Model->GetFullData1('tbl_chating',$where1);
+
+        $expiry_date = strtotime($val->expiry_date);
+        $today_date = strtotime(date('Y-m-d'));
+        $datediff = $today_date - $expiry_date;
+        $round_diff = round($datediff/(60*60*24));
+        
+        if($round_diff > '0')
+        {
+          $plan_status = "Expired";
+        }
+        elseif(count($contact_viewed) == ($current_plan[0]->contactbalance + $current_plan[0]->addoncontact) && count($message_viewed) == ($current_plan[0]->messagebalance + $current_plan[0]->addonmessage))
+        {
+          $plan_status = "Plan limit reached";
+        }
+        else
+        {
+          $plan_status = "Active";
+        }
+
+        $html .= '
+                <label for="inputName">Current Plan : </label>
+                '.$val->description.'<br>
+                <label for="inputName">Expiring On : </label>
+                '.$val->expiry_date.'<br>
+                <label>Contacts viewed : </label> '.count($contact_viewed).'/'.$current_plan[0]->contactbalance.'<br>
+                <label>Messages viewed : </label> '.count($message_viewed).'/'.$current_plan[0]->messagebalance.'<br>
+                <label>Addon Contacts : </label> '.$current_plan[0]->addoncontact.'<br>
+                <label>Addon Message : </label> '.$current_plan[0]->addonmessage.'<br>
+                <label>Status : </label> '.$plan_status.' <br>';
+      }
+      $html .= '</div>
+              <div class="form-group">
+                <input type="hidden" name="userid" id="userid" value="'.$user_id.'">
+                <label for="inputName">Select Plan</label>
+                <select id="inputStatus" class="form-control custom-select" name="plans">
+                  <option value="">--Select--</option>';
+         foreach($plan as $key => $value) {
+                $html .='<option value="'. $value->plan_id.'">'. $value->plan_name.'</option>';
+                  }
+                  
+              $html .='</select>
+              </div>
+              
+              <div class="form-group">
+                <label for="inputName">Extra Contact</label>
+                <input type="text" id="inputName" class="form-control" name="extracontact" value="0">
+              </div>
+
+              <div class="form-group">
+                <label for="inputName">Extra Message</label>
+                <input type="text" id="inputName" class="form-control" name="extramessage" value="0">
+              </div>
+             
+
+              <div class="form-group">
+                <label for="inputName">Comment </label>
+                <textarea id="inputName" class="form-control" name="comment"></textarea>
+              </div>
+           ';
+           echo $html;
+    }
+
+    public function approve_payment()
+    {
+      $plan = $this->input->post('plans');
+      $userid = $this->input->post('userid');
+      $extracontact = $this->input->post('extracontact');
+      $extramessage = $this->input->post('extramessage');
+      $comment = $this->input->post('comment');
+      
+      $where = array('plan_id'=>$plan);
+      $fetch_plan = $this->General_Model->fetch_row('tbl_plan',$where);
+
+      $data['user_id'] = $userid;
+      if($fetch_plan['plan_amount'] == "FREE")
+      {
+        $data['amount'] = '0';
+      }
+      else
+      {
+        $data['amount'] = $fetch_plan['plan_amount'];
+      } 
+      $data['description'] = $fetch_plan['plan_name'];
+      $data['date'] = date('Y-m-d');
+      $data['payment_staff_id'] = '1';
+      $data['plan_id'] = $fetch_plan['plan_id'];
+      $data['expiry_date'] = date('Y-m-d', strtotime($data['date']. ' + '.$fetch_plan['months'].' days'));
+      $data['comment'] = $comment;
+      $data['contactbalance'] = $fetch_plan['contacts'];
+      $data['messagebalance'] = $fetch_plan['messages'];
+      $data['addoncontact'] = $extracontact;
+      $data['addonmessage'] = $extramessage;
+      
+      $where = array('user_id'=>$userid,'status'=>'1');
+      $check_plan_active = $this->General_Model->fetch_row('tbl_payement',$where);
+
+      if(!empty($check_plan_active))
+      {
+        
+        $where = array('sender_id'=>$userid,'planid'=>$check_plan_active['id']);
+        $contact_viewed = $this->General_Model->GetFullData1('tbl_contact_viewed',$where);
+        $where1 = array('sender_id'=>$userid,'planid'=>$check_plan_active['id']);
+        $message_viewed = $this->General_Model->GetFullData1('tbl_chating',$where1);
+
+        $expiry_date = strtotime($check_plan_active['expiry_date']);
+        $today_date = strtotime(date('Y-m-d'));
+        $datediff = $today_date - $expiry_date;
+        $round_diff = round($datediff/(60*60*24));
+
+        $check_remain_count = count($contact_viewed);
+        $contactbalance = $check_plan_active['contactbalance'] + $extracontact;
+        $check_remain_count1 = count($message_viewed);
+        $messagebalance = $check_plan_active['messagebalance'] + $extramessage;
+        if($round_diff < '0')
+        {
+          if($check_remain_count <= $contactbalance && $check_remain_count1 <= $messagebalance)
+          {
+            $data['status'] = '0';
+          }
+          else
+          {
+            $data['status'] = '1';
+          }
+        }
+        else
+        {
+          $data['status'] = '1';
+        }
+        $update['status'] = '0';
+        $check_remain_count = $this->General_Model->UpdateData('tbl_payement','id',$check_plan_active['id'],$update);
+      }
+      else
+      {
+        $data['status'] = '1';
+      }
+
+      $this->General_Model->AddRecord('tbl_payement', $data);   
+      redirect('admin/search_profiles');
+    }
+    
+    public function photo_approval()
+    {
+      $data['page'] = "Photo Approval";
+      $data['photo'] = $this->General_Model->unapprovephoto();
+      $this->load->view('admin/photo_approval',$data);
+    }
+
+    public function delete_photo()
+    {
+      $data['comment'] = $this->input->post('delete_comment');
+      $data['status'] = '1';
+      $user_image_id = $this->input->post('user_image_id');
+      $this->General_Model->UpdateData($table = 'tbl_userimages',$column_name = 'user_image_id',$user_image_id,$data);
+      
+      redirect('admin/photo_approval');
+    }
+
+    public function approve_photo()
+    {
+      $data['status'] = '2';
+      $user_image_id = $this->input->post('img_id');
+      $this->General_Model->UpdateData($table = 'tbl_userimages',$column_name = 'user_image_id',$user_image_id,$data);
+      
+      echo 1;
+    }
+
+}

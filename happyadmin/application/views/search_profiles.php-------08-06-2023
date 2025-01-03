@@ -1,0 +1,3092 @@
+<!DOCTYPE html>
+<?php include('header.php'); ?>
+<?php  if($_SESSION['user_type']==='0') {
+     include('menu.php');
+ }
+if($_SESSION['user_type']==='3'){
+include('menusales.php');
+}
+if($_SESSION['user_type']==='4'){
+include('menucreation.php');	
+}
+if($_SESSION['user_type']==='6'){
+include('menusupport.php');	
+}
+if($_SESSION['user_type']==='7'){
+include('menuchatsupport.php');	
+}
+ ?>
+
+<link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+
+<!-- <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css"> -->
+<link rel="stylesheet" href="<?php echo base_url() ?>assets/css/custom.css">
+
+<style>
+.msginput{
+    height:500px;
+    width:500px;
+    word-break: break-word;
+}
+</style>
+
+<div class="app-wrapper">
+
+				<div class="app-content pt-3 p-md-3 p-lg-4">
+				<div class="container-xl">
+
+				<div class="row g-3 mb-4 align-items-center justify-content-between">
+				<div class="col-auto">
+				<h1 class="app-page-title mb-0">Search profiles</h1>
+				</div>
+
+				<!-- Main content -->
+				<section class="content">
+				<div class="container-fluid">
+				<div class="row">
+				<div class="col-12">
+
+				<div class="card">
+				<!-- <div class="card-header">
+				<h3 class="card-title">DataTable with default features</h3>
+				</div> -->
+				<!-- /.card-header -->
+				<div class="card-body">
+
+				<div class="row">
+				<div class="col-lg-4">
+				<form method="post" action="<?= base_url() ?>admin/search_profiles">
+				<div class="form-group">
+				<label for="inputName">ID/Contact No. <font color="red">*</font></label>
+				<input type="text" id="inputName" class="form-control" name="search_profile" required>
+				<span id="error" style="color:red;display:none;">Please insert Happynikah ID/Mobile No.</span>
+				</div>
+				</div>
+				<div class="col-lg-6">
+				<!-- <div class="form-group"> -->
+
+				<label for="inputName">&nbsp;</label>
+				<!-- <button onclick="search_profiles()" name="search_profile_btn" class="btn btn-success" style="margin-top: 32px;"> -->
+				<button type="submit" name="search_profile_btn" class="btn btn-success" id="search_button" style="margin-top: 32px;">
+				<i class="fas fa-search"></i>
+				</button>
+				</form>
+				<button onclick="window.location.href='<?= base_url() ?>admin/search_profiles'" name="search_profile_btn" class="btn btn-danger" style="margin-top: 32px;">
+				<i class="fa fa-undo" aria-hidden="true"></i>
+				</button>
+				<!-- </div> -->
+				</div>
+				</div>
+				<br>
+				<?php
+			if(empty($get_search_profiles)){
+            echo "Please Enter Valid Phone Number / ID";
+			} 
+			else
+			{  
+			    $r_id = $get_search_profiles->id;
+				$happynikah_id = $get_search_profiles->happynikah_id;
+				$name = $get_search_profiles->name;
+				$age = $get_search_profiles->age;
+				$phone = $get_search_profiles->phone;
+				$marital_status = $get_search_profiles->marital_status;
+
+				if($get_search_profiles->gender == '1')
+				{
+				$gender = "Male";
+				}
+				else
+				{
+				$gender = "Female";
+				}
+				$address = $get_search_profiles->address;
+				$reg_date = $get_search_profiles->reg_date;
+
+				if($get_search_profiles->reg_through == '0' || 
+				$get_search_profiles->reg_through == '2')
+				{
+				$reg_through = "Customer Registered";
+				}
+				else 
+				{
+				$reg_through = "Staff Registered";
+				}
+
+				if($get_search_profiles->status == '0')
+				{
+				$status = "Pending";
+				} 
+				elseif ($get_search_profiles->status == '1')
+				{
+				$status = "Approved";
+				} 
+				elseif ($get_search_profiles->status == '2') 
+				{
+				$status = "Rejected";
+				} 
+				elseif ($get_search_profiles->status == '3') 
+				{
+				$status = "Deleted";
+				}
+				elseif ($get_search_profiles->status == '4') 
+				{
+				$status = "Block";
+				}
+				elseif ($get_search_profiles->status == '5')
+				{
+				$status = "UnBlock";
+				}
+
+				?>
+				<div class="table-scroll-y my-custom-scrollbar" style="height: 880px;">
+				<div id="profile" style="background-color:#f2f2f2">
+				<table id="example" class="table">
+				<thead style="background-color: #FEEAEA;">
+				<tr>
+				<th style="padding-left: 48px;">HN ID</th>
+				<th>Age</th>
+				<!-- <th>Gender</th> -->
+				<th>Last Login</th>
+				<th>Name</th>
+				<th>Payment Status</th>
+				<!-- <th>Profile Description</th> -->
+				<!-- <th>Registered on </th> -->
+				<!-- <th>Registration Through </th> -->
+				</tr>
+				</thead>
+				<tbody>
+
+
+				<tr style="border:2px solid black;">
+				<td>
+				<span id="hn_id" style="padding-left: 39px;color:red;">
+				
+				
+			<?php $nh10=$this->db->select('happynikah_id','status')->from('tbl_registration')
+			->where('happynikah_id',$happynikah_id)->get()->num_rows();?>
+			
+			<?php $nh20=$this->db->select('*')->from('tbl_registration')
+			->where('happynikah_id',$happynikah_id)->get()->result_array();?>
+			
+			<?php $nh25=$this->db->select('phone','status')->from('tbl_registration')
+			->where('phone',$phone)->get()->num_rows();?>
+			
+				<?php $nh26=$this->db->select('*')->from('tbl_registration')
+			->where('phone',$phone)->where('status','1')->get()->result_array();?>
+			
+		
+		
+		    
+                <?php foreach($nh20 as $val)
+                {?>
+                <?php $iddata=$val['happynikah_id'];?>
+                
+                <?php if($get_search=='1')
+                {?>
+                
+                <b>
+                
+                <?php echo $val['happynikah_id']; ?></b>
+                
+                <?php
+                if($val['status'] == '0')
+                {
+                $statusid = "Pending";
+                } 
+                elseif($val['status'] == '1')
+                {
+                $statusid = "Approved";
+                } 
+                elseif($val['status'] == '2') 
+                {
+                $statusid = "Rejected";
+                } 
+                elseif($val['status'] == '3')
+                {
+                $statusid = "Deleted";
+                }
+                elseif($val['status'] == '4')
+                {
+                $statusid = "Block";
+                }
+                elseif($val['status'] == '5')
+                {
+                $statusid = "UnBlock";
+                }
+                ?>
+                (<?php echo $statusid;?>)
+               
+             
+                
+                <?php }?>	
+                <?php }?>
+              
+                
+                
+                
+     <?php $rr=$this->db->query("SELECT phone FROM tbl_registration WHERE phone=$phone HAVING COUNT(phone) > 1");?>
+
+                
+         <?php if($get_search!=1)
+         {?>
+         <b>
+             <?php foreach($nh26 as $test)
+             {?>
+            <?php $data_search=$test['happynikah_id'];?>
+            
+            <?php echo $data_search;?>
+             <?php }?>
+         </b>
+         
+        <?php 
+        if ($get_search_profiles->status == '1' || $get_search_profiles->status == '2' || $get_search_profiles->status == '3' 
+        || $get_search_profiles->status == '4' || $get_search_profiles->status == '5')
+        {
+        ?>
+        <?php echo "(Approved)";?>
+        <?php }?>
+          
+       
+        
+          <?php 
+        if ($get_search_profiles->status == '2')
+        {
+        ?>
+        <?php echo "(Rejected)";?>
+        <?php }?>
+        
+          <?php 
+        if ($get_search_profiles->status == '4')
+        {
+        ?>
+        <?php echo "(Block)";?>
+        <?php }?>
+        
+          <?php 
+        if ($get_search_profiles->status == '5')
+        {
+        ?>
+        <?php echo "(UnBlock)";?>
+        <?php }?>
+          
+          <?php }?>
+    
+        
+				
+			<?php $phone2 = $get_search_profiles->phone;?> 
+				<?php $nh=$this->db->select('*')->from('tbl_registration')
+			  ->where('phone',$phone2)->get()->num_rows();?>
+			
+			
+			
+				<?php $nh5=$this->db->select('*')->from('tbl_registration')
+			->where('phone',$phone)->get()->result_array();?>
+			  
+			 
+			
+			 
+                 
+				<br>
+				<br>
+			
+			<?php $nh=$this->db->select('*')->from('tbl_registration')
+			->where('phone',$phone)->get()->num_rows();?>
+
+			<?php if($nh=='1')
+			{
+			?>
+
+			<button class="btn btn-danger dp" 
+			style="margin-left: 35px;font-size: 9px;margin-top: -44px;display: none;">
+
+			<b><span style="color:white">Duplicate profile<span>
+			</b>
+			</button>
+			<?php }?>
+
+			<?php if($nh>1)
+			{
+			?>
+				<button class="btn btn-danger dp" 
+				style="margin-left: 35px;font-size: 9px;margin-top: -44px;">
+
+				<b><span style="color:white">Duplicate profile<span>
+				</b>
+			    </button>
+			    <?php }?>
+
+				<br>
+				<br>
+				<div style="padding-left: 39px;color:green;margin-top:-40px;">
+				<b>
+				<?php echo $reg_through; ?>
+				</b>
+			    </div>
+				</span>
+				</td>
+				
+				<td><span id="profile_age"><?php echo $age; ?></span></td>
+				<td><?php 
+				  $this->db->select('tbl_registration.id,advt_register.user_id,advt_register.date');
+                  $this->db->from('advt_register');
+                  $this->db->join('tbl_registration','tbl_registration.id = advt_register.user_id');
+                  $this->db->where('user_id',$r_id);                                  
+                  $query = $this->db->get()->row_array();
+                  echo $query['date']; ?></td>
+				<td><span id="profile_name"><?php echo $name; ?></span></td>
+			
+                <td><span id="profile_status"><?php 
+                  $this->db->select('tbl_registration.id,tbl_payement.user_id,tbl_payement.status');
+                  $this->db->from('tbl_payement');
+                  $this->db->join('tbl_registration','tbl_registration.id = tbl_payement.user_id');
+                  $this->db->where('user_id',$r_id);                                  
+                  $query = $this->db->get()->row_array();                 	
+                if($query['status']=='1') {
+                echo "Paid";
+                }else{
+                echo "Unpaid";	
+                }; ?></span></td>
+				
+				</tr>
+				
+				<tr>
+
+				<td>
+
+	 <div class="row">
+		<div class="col-sm-10">
+			<ul style="list-style-type:none;margin-left: -9px;margin-right:0px;">
+				<li class="" style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="as" href="<?= base_url() ?>admin/profile/view/<?= $r_id ?>" data-replace="Basic Details">
+				<span style="padding-left: 10px;">
+				Basic Details  <?php $this->session->userdata('user_id_admin');?>
+				</span>
+				</a>
+				</li>
+				<br>
+				<?php if($this->session->userdata('user_type')!='0'){
+									?>
+								<li style="background-color:#FFFFFF;margin-left: -31px;">
+									<a class="as" href="#" data-replace="Verify Email" style='display:none;'>
+										<span style="padding-left: 10px;">
+											Verify Email
+										</span>
+									</a>
+								</li>
+
+							<?php }else{?>
+								<li style="background-color:#FFFFFF;margin-left: -31px;">
+									<a class="as" href="#" data-replace="Verify Email">
+										<span style="padding-left: 10px;">
+											Verify Email
+										</span>
+									</a>
+								</li>
+							<?php }?>
+									
+				<br>
+				<li style="background-color:#FFFFFF;margin-left: -31px;">
+
+				<?php
+				$q= $this->db->select('*')->from('tbl_hideprofile')->order_by('id',"DESC")
+				->limit(1)->get()->row();
+				//print_r($q);
+			
+
+				if($q->hide_status=='0')
+				{ ?>
+				<a class="hello" onclick="unhideprofile();" data-replace="Unhide Profile">
+				<span style="padding-left: 10px;">
+				Unhide Profile</span></a>
+				<?php } ?>
+
+				<?php if($q->hide_status=='1')
+				{ ?>
+				<a class="hi" onclick="hideprofile();" data-replace="Hide Profile">
+				<span style="padding-left: 10px;">	
+				Hide Profile
+				<?php } ?>
+				</span>
+				</a>
+
+				<?php if($q->hide_status=='')
+				{?>
+				<a class="hi" onclick="hideprofile();" data-replace="Hide Profile">
+				<span style="padding-left: 10px;">	
+				Hide Profile
+				<?php } ?>
+				</span>
+				</a>
+				</li>
+
+				<br>
+				<li style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="asm" href="" data-replace="Enter message">
+				<span style="padding-left: 10px;">
+				Enter Message
+				</span>
+				</a>
+				</li>
+				<br>
+			
+				<li style="background-color:#FFFFFF;margin-left: -31px;">
+				<?php 
+				$id=$get_search_profiles->id;         
+				$bldata=$this->db->select('*')->from('tbl_registration')->where('id',$id)->get()->row();
+				
+				if($bldata->status=='4') { ?>
+				<a class="bbc" onclick="unblockprofile();"data-replace="Unblock Profile">
+				<span style="padding-left: 10px;">	
+				Unblock Profile</span></a>
+				<?php } if($bldata->status=='5' || $bldata->status=='0' || $bldata->status=='1') { ?>
+				<a class="bbb" onclick="blockprofile();" data-replace="Block Profile" style="color: #000;">
+				<span style="padding-left: 10px;">	
+				Block Profile</span></a>
+				<?php } ?>
+
+				</li>
+				<br>
+				<?php if($bldata->status!='3' || $this->session->userdata('user_type')=='4' || $this->session->userdata('user_type')=='3'){ ?>
+				<li style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="asms"  data-id="<?php echo $get_search_profiles->id;?>"
+				data-replace="Delete">
+				<span style="padding-left: 10px;">
+				Delete
+				</span>
+				</a>
+				</li>
+				<?php }?>
+                <br>
+                
+                
+                <?php
+                if($get_search_profiles->status == '3') { ?>
+                
+                <li style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="asms5"  data-id="<?php echo $get_search_profiles->id;?>"
+				data-replace="Approve Profile">
+				<span style="padding-left: 10px;color:#000;">
+				Approve Profile
+				</span>
+				</a>
+				</li>
+				<?php }?>
+                 <br>
+                 
+                <?php if($this->session->userdata('user_type')=='0' || $this->session->userdata('user_type')=='3' || $this->session->userdata('user_type')=='9'){ ?>
+                <li style="background-color:#FFFFFF;margin-left: -31px;">
+                <?php
+                if($get_search_profiles->status != '3') { ?>
+                <a class="ap" href="" data-replace="Approve to Paid" target="_blank" id="approve" data-toggle="modal" data-target="#approve_pay" onclick="approve_pay('<?= $r_id ?>')">
+                <span style="padding-left: 10px;">
+                Approved to Paid
+                </span>
+                </a>
+                <?php } ?>
+                </li>
+                <?php } ?>
+                
+                <br>
+                
+                <?php if($this->session->userdata('user_type')=='0' || $this->session->userdata('user_type')=='3'){ ?>
+                <li style="background-color:#FFFFFF;margin-left: -31px;">
+                <?php
+                if($get_search_profiles->status != '3') { ?>
+                <a class="active_offer" href="" data-replace="Active Offer" target="_blank" id="approve" data-toggle="modal" data-target="#approve_pay" onclick="approve_pay('<?= $r_id ?>')">
+                <span style="padding-left: 10px;color:#000;">
+                Active Offer
+                </span>
+                </a>
+                <?php } ?>
+                </li>
+                <?php } ?>
+                
+							
+				<br>
+				<li style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="ps" data-replace="Change Password" onclick="change_pass();">
+				<span style="padding-left: 10px;">
+				Change Password
+				</span>
+				</a>
+				</li>
+				
+                <br>
+                <?php if($this->session->userdata('user_type')=='0' || $this->session->userdata('user_type')=='3' || $this->session->userdata('user_type')=='7'){
+                ?>
+                <li style="background-color:#FFFFFF;margin-left: -31px;">
+                <a class="pp" href="" data-replace="Postpone Payment">
+                <span style="padding-left: 10px;">
+                Postpone Payment
+                </span>
+                </a>
+                </li>
+                <?php } ?>
+                <br>
+				<!-- <li style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="as" href="#" data-replace="Active Offer">
+				<span style="padding-left: 10px;">
+				Active offers
+				</span>
+				</a>
+				</li> -->
+                
+                <?php if($this->session->userdata('user_type')=='0' || $this->session->userdata('user_type')=='3'){
+                ?>
+                <li style="background-color:#FFFFFF;margin-left: -31px;">
+                <a class="as" href="#" data-replace="Online Payment">
+                <span style="padding-left: 10px;">
+                Online Payment
+                </span>
+                </a>
+                </li>
+                <?php } ?>
+                
+                <br>
+                <?php if($this->session->userdata('user_type')=='0' || $this->session->userdata('user_type')=='3'){ ?>
+                <li style="background-color:#FFFFFF;margin-left: -31px;">
+                <a class="id" onclick="" data-replace="Intrest Details">
+                <span style="padding-left: 10px;">
+                Interest Details
+                </span>
+                </a>
+                </li>
+                <?php } ?>
+                <br>
+                
+				<!-- <li style="background-color:#FFFFFF;margin-left: -31px;">
+				<a class="as" href="#" data-replace="Active calls">
+				<span style="padding-left: 10px;">
+				Active calls
+				</span>
+				</a>
+				</li> -->
+			</ul>
+
+		</div>
+		<div class="col-sm-10">
+		 <input type="hidden" value="<?php echo $this->session->userdata('user_id_admin');?>" id="session">
+		 
+                <?php 
+                $r_id=$get_search_profiles->id;
+                
+                $this->db->select('tbl_registration.id,tbl_registration.happynikah_id,tbl_payement.*');
+                $this->db->from('tbl_payement');
+                $this->db->join('tbl_registration','tbl_registration.id = tbl_payement.user_id');
+                $this->db->where('tbl_payement.user_id',$r_id);  
+                $this->db->where('tbl_payement.status','1');   
+                $query = $this->db->get()->result_array();
+                
+                
+                foreach ($query as $profile_value) {
+                
+                if($profile_value['status']=='1') {?>
+		           	     
+                <div class="div4 card" style="background-color: white;padding: 10px;padding-left: 110px;padding-right: 110px;position: absolute;
+                left: 585px;top: 180px;">
+                <span style="font-family:Serif;"><?php echo $profile_value['contactbalance']."<b style='margin-left: 2px;'>Contacts</b> - &nbsp;&nbsp;".$profile_value['messagebalance']."<b style='margin-left: 2px;'>Messages</b>"; ?></span><br>
+                <span style="font-family:Serif;padding-left:14px;"><b>Validity</b> :
+                
+                <?php $expire=$profile_value['expiry_date'];?>
+                <?php echo date('d-m-Y',strtotime($expire));?> </span><br><br>
+                </div><br>
+                <?php } }?>
+				
+				
+			 <div class="div4 card" style="margin-top: 165px;background-color: white;padding: 0px;width: 44%;height: 177px;position: absolute;left: 585px;margin-left: 0px;
+    top: 175px;">
+
+				<span>
+				🥉<b>BRONZE PLAN</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-rupee" viewBox="0 0 16 16">
+				<path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4v1.06Z" />
+				</svg></i><b><s>1800</s></b><b>
+				<font style="color: green;"> 999</font>
+				</b><br><br>
+
+				💎<b>DIAMOND PLAN</b> &nbsp;&nbsp;:<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-rupee" viewBox="0 0 16 16">
+				<path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4v1.06Z" />
+				</svg><b><s>4500</s></b><b>
+				<font style="color: green;"> 3500</font>
+				</b><br><br>
+
+				👑<b>CROWN PLAN </b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-rupee" viewBox="0 0 16 16">
+				<path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4v1.06Z" />
+				</svg><b><s>6900</s></b><b>
+				<font style="color: green;"> 5600</font>
+				</b><br><br>
+
+				🔅<b>MASTER PLAN</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<svg style="margin-left:0px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-currency-rupee" viewBox="0 0 16 16">
+				<path d="M4 3.06h2.726c1.22 0 2.12.575 2.325 1.724H4v1.051h5.051C8.855 7.001 8 7.558 6.788 7.558H4v1.317L8.437 14h2.11L6.095 8.884h.855c2.316-.018 3.465-1.476 3.688-3.049H12V4.784h-1.345c-.08-.778-.357-1.335-.793-1.732H12V2H4v1.06Z" />
+				</svg> <b>
+				<font style="color: green;">9999</font>
+				</b>
+				</span>
+
+				<br>
+				<br>
+				</div>
+            	<?php if($this->session->userdata('user_type')=='0' || $this->session->userdata('user_type')=='3') { ?> 	
+				<div class="div4" style="left: 510px;
+                 margin-top: 370px;"> 
+                 <span style="font-family:Serif;"><u>Pre Payment Details</u></span>
+				<br>
+				<br>
+				<button id="paymentdetail" class="button-55" onclick="ShowPayment();">Show Payment Details</button>
+				<br>
+				<br>
+				<div id="prepaymentdetails" style="color: red;display:none;">
+				<div class="table-wrapper-scroll-y my-custom-scrollbar">
+				<table class="table table-striped">
+
+				<tbody>
+			  <tr>
+			      
+            <?php $paiddata2=$this->db->select('*')->from('tbl_payement')->join('tbl_plan','tbl_plan.plan_id=tbl_payement.plan_id')
+            ->where('user_id',$r_id)->get()->result_array();?>
+            <?php foreach($paiddata2 as $data2)
+            {?>			    
+          
+
+            <td style="color: red;"><?php echo $data2['plan_name'];?> :</td>
+            <td style="color: red;"><b><?php echo $data2['plan_strick_amount'];?></b></td>
+            
+            </tr>
+            <tr>
+            
+            <td style="color: red;">Discount :</td>
+           
+            <?php $dis=$data2['plan_strick_amount']-$data2['plan_amount'];?>
+            <td style="color: red;"><b><?php echo $dis;?></b></td>
+            
+            </tr>
+            <?php }?>
+            
+            <tr>
+                
+            
+            <td style="color: red;">Sale Amount :</td>
+            <td style="color: red;"><b><?php echo $data2['plan_amount'];?></b></td>
+            
+            </tr>
+            <tr>
+                
+            <?php $paiddata=$this->db->select('*')->from('tbl_payement')->join('tbl_registration','tbl_registration.id=tbl_payement.user_id')
+            ->where('user_id',$r_id)->get()->result_array();?>
+            <?php foreach($paiddata as $data)
+            {?>
+            <td style="color: red;"><?php echo date('d-m-Y',strtotime($data['date']));?></td>
+            
+            </tr>
+            <tr>
+            
+            <td style="color: red;">Payment Mode :</td>
+            <td style="color: red;">Online</td>
+            
+            </tr>
+            <tr>
+            
+            <td style="color: red;">Money :</td>
+            <td style="color: red;"><?php echo $_SESSION['username'];?></td>
+            
+            </tr>
+            <tr>
+            
+            <td style="color: red;"><b>Paid By :</b></td>
+            <td style="color: red;">
+            <!--<b>Harshan</b>-->
+            <b><?php echo $data['name'];?></b>
+            </td>
+            
+            </tr>
+            <?php }?>
+            
+            </tbody>
+            </table>
+            </div>
+            
+            
+            </div>
+            
+            
+            </div>
+
+                <?php } ?>
+
+
+				</tr>
+				</td>
+				<tr>
+
+				<td style="padding-top: 77px;">
+				    <div class="d-flex">
+				<div class="tab">
+				<button class="btn btn-primary" style="padding-right:50px;" onclick="openCity(event, 'Admincmnts')">Admin comments
+   
+				</button>
+				<button class="btn btn-primary" onclick="openCity(event, 'Actioncmnts')">Action comments</button>
+
+				</div><br><br><br>
+
+				<div id="Admincmnts" class="tabcontent" style="margin-right: -480px;margin-top:60px;">
+				<h3><?php echo $this->session->userdata('username');?></h3>
+				<div class="table-wrapper-scroll-y my-custom-scrollbar">
+
+				<table class="table table-bordered table-striped mb-0">
+				<thead>
+				<!-- <tr>
+				<th scope="col">SI</th>
+				<th scope="col">First</th>
+				<th scope="col">Last</th>
+				<th scope="col">Age</th>
+				</tr> -->
+				</thead>
+				<tbody>
+			
+
+           <?php $sess_id=$this->session->userdata('user_id_admin');?>
+          
+				<?php 
+				 $todayfollow=$this->db->select('tbl_registration.id,tbl_registration.emp_id,tbl_followup.id,tbl_followup.status as fstatus,tbl_followup.message as fmessage,
+				 	tbl_followup.fdate as followdate,tbl_followup.cdate as currentdate')
+				->from('tbl_registration')
+				->join('tbl_followup','tbl_followup.uid=tbl_registration.id')
+				->where('tbl_followup.login_id',$sess_id)->get()->result_array();?>
+				
+				<?php $k=1;?>
+				
+				
+				<?php foreach ($todayfollow as $tdfollow) {
+				?>
+
+				<tr>			
+				<th scope="row">
+				<?php echo $k++;?>
+				</th>
+				<td>
+
+				
+               	 <?php
+                if ($tdfollow['fstatus'] == 'Ring')
+                {
+                $tbl_status = "Ring Not Response(RNR)";
+                ?>
+                <?php echo $tbl_status;
+                }?>
+                <?php
+                if ($tdfollow['fstatus'] == 'Add comments')
+                {
+                $tbl_status = "Add comments";
+                ?>
+                <?php echo $tbl_status;
+                }?>
+
+                <?php
+                if ($tdfollow['fstatus'] == 'Interested')
+                {
+                $tbl_status = "Interested/Follow up";
+                ?>
+                <?php echo $tbl_status;
+                }?>
+                <?php
+                if ($tdfollow['fstatus'] == 'busy')
+                {
+                $tbl_status = "Busy/call back";
+                ?>
+                <?php echo $tbl_status;
+                }?>
+                <?php
+                if ($tdfollow['fstatus'] == 'Switched')
+                {
+                $tbl_status = "Switched off";
+                ?>
+                <?php echo $tbl_status;
+                }?>
+						
+
+					</td>
+				<td>
+					<!--Customer is not answering call-->
+                  <?php echo $tdfollow['fmessage'];?> 
+                 
+                     
+				</td>
+				<td>
+			<?php $cdate5= $tdfollow['followdate'];?>
+			   <?php $new_date5 = date("d-m-Y", strtotime($cdate5));?> 
+
+
+				<?php echo $new_date5;?>
+				
+			    </td>
+				<td>
+				<!-- <?php echo $tdfollow['name'];?> -->
+				<?php echo $this->session->userdata('username');?>
+
+					<?php $cdate= $tdfollow['currentdate'];?>	
+		 
+
+				 <?php echo $cdate;?>
+
+
+				</td> 
+				</tr>
+                <?php }?>
+                
+                
+                
+                <?php $sess_id=$this->session->userdata('user_id_admin');?>
+          
+				<?php 
+				 $blockdata=$this->db->select('*')
+				->from('tbl_registration')
+			    ->where('emp_id',$sess_id)->get()->result_array();?>
+				
+				<?php foreach ($blockdata as $blockdatanew) 
+				{
+				?>
+
+				<tr>			
+				<th scope="row">
+				<?php echo $k++;?>
+				</th>
+				<td>
+
+				
+               <?php echo $blockdatanew['block_status'];?> 
+						
+
+					</td>
+				<td>
+					<!--Customer is not answering call-->
+                  <?php echo $blockdatanew['block_description'];?> 
+                 
+                     
+				</td>
+				<td>
+			<?php $cdate5= $blockdatanew['reg_date'];?>
+			   <?php $new_date5 = date("d-m-Y", strtotime($cdate5));?> 
+
+
+				<?php echo $new_date5;?>
+				
+			    </td>
+				<td>
+				<!-- <?php echo $tdfollow['name'];?> -->
+				<?php echo $this->session->userdata('username');?>
+
+				
+
+					<?php $cdate= $blockdatanew['block_date'];?>	
+		 
+
+				 <?php echo $cdate;?>
+
+
+				</td> 
+				</tr>
+                <?php }?>
+                
+                
+                
+                
+                 <?php $sess_id=$this->session->userdata('user_id_admin');?>
+          
+				<?php 
+				 $deletedata=$this->db->select('*')
+				->from('tbl_registration')
+				->where('emp_id',$sess_id)->get()->result_array();?>
+				
+			
+				
+				
+				<?php foreach ($deletedata as $deletedatanew) 
+				{
+				?>
+
+				<tr>			
+				<th scope="row">
+				<?php echo $k++;?>
+				</th>
+				<td>
+
+				
+               <?php echo $deletedatanew['reason_status'];?> 
+						
+
+					</td>
+				<td>
+					<!--Customer is not answering call-->
+                  <?php echo $deletedatanew['message'];?> 
+                 
+                     
+				</td>
+				<td>
+			<?php $cdate5= $deletedatanew['reg_date'];?>
+			   <?php $new_date5 = date("d-m-Y", strtotime($cdate5));?> 
+
+
+				<?php echo $new_date5;?>
+				
+			    </td>
+				<td>
+				<!-- <?php echo $tdfollow['name'];?> -->
+				<?php echo $this->session->userdata('username');?>
+
+				
+
+					<?php $cdate= $deletedatanew['delete_date'];?>	
+		 
+
+				 <?php echo $cdate;?>
+
+
+				</td> 
+				</tr>
+                <?php }?>
+                
+                
+                
+                
+                  <?php $sess_id=$this->session->userdata('user_id_admin');?>
+          
+				<?php 
+				 $hidedata=$this->db->select('*')
+				->from('tbl_hideprofile')
+				->where('emp_id',$sess_id)->get()->result_array();?>
+				
+			
+				
+				
+				<?php foreach ($hidedata as $hidedatanew) 
+				{
+				?>
+
+				<tr>			
+				<th scope="row">
+				<?php echo $k++;?>
+				</th>
+				<td>
+
+				
+               <?php echo $hidedatanew['hide_description'];?> 
+						
+
+					</td>
+				<td>
+			
+			  
+			  <?php $hidestatus=$hidedatanew['hide_status'];?>
+			  
+			  <?php if($hidedatanew['hide_status']=='0')
+        {?>
+        <?php echo "Hide Profile";?>
+        <?php }?>
+        
+        <?php if($hidedatanew['hide_status']=='1')
+        {?>
+        <?php echo "UnHide Profile";?>
+        <?php }?>
+        
+                     
+				</td>
+				<td>
+			<?php $cdate5= $deletedatanew['hide_date'];?>
+			   <?php $new_date5 = date("d-m-Y", strtotime($cdate5));?> 
+
+
+				<?php echo $new_date5;?>
+				
+			    </td>
+				<td>
+				<!-- <?php echo $tdfollow['name'];?> -->
+				<?php echo $this->session->userdata('username');?>
+
+				
+
+					<?php $cdate= $deletedatanew['hide_date'];?>	
+		 
+
+				 <?php echo $cdate;?>
+
+
+				</td> 
+				</tr>
+                <?php }?>
+                
+                
+                
+                
+				</tbody>
+				</table>
+
+
+
+				</div>
+				</div>
+
+		<div id="Actioncmnts" class="tabcontent" style="margin-right: -480px;margin-top:60px;">
+				<h3><?php echo $this->session->userdata('username');?></h3>
+				<div class="table-wrapper-scroll-y my-custom-scrollbar">
+
+				<table class="table table-bordered table-striped mb-0">
+				<thead>
+				<!-- <tr>
+				<th scope="col">#</th>
+				<th scope="col">First</th>
+				<th scope="col">Last</th>
+				<th scope="col">Handle</th>
+				</tr> -->
+				</thead>
+				<tbody>
+				<!-- <tr>
+				<th scope="row">1</th>
+				<td>Contact details viewed</td>
+				<td>Contact details viewed</td>
+				<td>17-01-2023 10:00 AM</td>
+				<td>Anju</td>
+				</tr> -->
+				<!-- <tr>
+				<th scope="row">2</th>
+				<td>Profile verified</td>
+				<td>Profile Verified ny Admin </td>
+				<td>17-01-2023 10:00 AM</td>
+				<td>harshan</td>
+				</tr> -->
+				
+				 <?php $sess_id=$this->session->userdata('user_id_admin');?>
+          
+				<?php 
+				$action=$this->db->select('tbl_registration.id,tbl_registration.happynikah_id,tbl_contactsview.*')
+				->from('tbl_registration')
+				->join('tbl_contactsview','tbl_contactsview.receiver_id=tbl_registration.id')
+				->where('tbl_contactsview.session_id',$sess_id)->get()->result_array();?>
+				 
+				 <?php $i=1;?>
+				
+				
+				<!--<tr>-->
+				<!--<th scope="row">3</th>-->
+				<!--<td>Photo Approved</td>-->
+				<!--<td>Photo 3 approved </td>-->
+				<!--<td>17-01-2023 10:00 AM</td>-->
+				<!--<td>Neethu</td>-->
+				<!--</tr>-->
+				
+				<!--<tr>-->
+				<!--<th scope="row">4</th>-->
+				<!--<td>Not done welcome call</td>-->
+				<!--<td>Not done welcome call</td>-->
+				<!--<td>17-01-2023 10:00 AM</td>-->
+				<!--<td>Neethu</td>-->
+				<!--</tr>-->
+				
+				 <?php foreach($action as $actionnew)
+				 {?>
+				 
+				<tr>
+				
+				<th scope="row"><?php echo $i++; ?></th>
+				<td>Contact details viewed</td>
+				
+				<td><?php echo $actionnew['happynikah_id'];?>
+				Contact details viewed</td>
+				<td><?php echo $actionnew['cdate'];?></td>
+				<td><?php echo $this->session->userdata('username');?></td>
+				</tr>
+				
+				    <?php }?>
+				    
+				</tbody>
+				</table>
+
+				</div>
+				</div>
+
+
+
+			
+				
+			
+			
+			
+
+
+				<!-- <a target="_blank" id="verifyemail" class="btn btn-success">verify email</a> -->
+				<!-- <a target="_blank" id="hideprofile" class="btn btn-success">hide profile</a> -->
+				<!-- <a target="_blank" id="message" class="btn btn-success">enter message</a> -->
+				<!-- <a target="_blank" id="blockuser" class="btn btn-success">block</a> -->
+				<!-- <a target="_blank" id="deleteuser" class="btn btn-success">delete</a> -->
+
+				<!-- <a target="_blank" id="changepassword" class="btn btn-success">change password</a> -->
+				<!-- <a target="_blank" id="interest" class="btn btn-success">interest details</a> -->
+
+				</div>
+
+
+				<?php
+				}  
+				?>
+
+
+
+
+
+				</div>
+				<!-- /.card-body -->
+				</div>
+				<!-- /.card -->
+				</div>
+				<!-- /.col -->
+				</div>
+				<!-- /.row -->
+				</div>
+				<!-- /.container-fluid -->
+				</section>
+				<!-- /.content -->
+				</div>
+				<!-- /.content-wrapper -->
+
+				<!-- modals of search page  -->
+
+
+
+                <!-- Modal for enter message -->
+                <div class="modal fade" id="enterMessage" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                
+                <h5 class="modal-title" id="exampleModalLongTitle">Enter Message
+                
+                <!--  <?php echo $this->session->userdata('user_id_admin');?>  -->
+                
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                
+                <form id="contact" method="post" action="<?php echo base_url(); ?>admin/followup_register">
+                
+                <input type="hidden" name="update_id" id="update_id"  
+                value="<?php echo $get_search_profiles->id;?>">
+                
+                
+                
+                <!--   <input type="hidden" name="update_id" id="update_id"/> -->
+                
+                <div class="modal-body">
+                <div class="mb-3">
+                <label for="inputName" class="form-label">Status</label>
+                <select id="status" class="form-control custom-select" name="status">
+                <option value="Interested" name="status">Interested / Follow up</option>
+                <option value="Ring" name="status">Ring not respond (RNR) </option>
+                <option value="busy" name="status">Busy / call back</option>
+                <option value="Add comments" name="status">Add Comments</option>
+                <option value="Switched" name="status">Switched off</option>
+                </select>
+                </div>
+                
+                <div class="mb-3" id="follow">
+                <label for="setting-input-3" class="form-label">Follow up date</label>			
+                <input type="text" id="noSunday" name="fdate">
+                </div>
+                
+                
+                <div class="mb-3" id="follow2" style="display:none">
+                <label for="setting-input-3" class="form-label">Follow up date</label>		
+                <input type="text" id="noSunday2" name="fdate">
+                </div>
+                
+                <div class="mb-3">
+                <label for="inputName" class="form-label">Message</label>
+                <textarea id="message" class="form-control"
+                required="" name="message"
+                style="height: 160px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?>
+                </textarea>
+                
+                <!--<?php echo $this->session->userdata('user_id_admin');?>-->
+                
+                </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit"  id="save-project-btn3"  name="register" class="btn btn-primary">Save changes</button>
+                
+                </div>
+                </div>
+                </div>
+                </form>
+                </div>
+                
+
+		<script type="text/javascript">
+		$(document).ready(function() {
+
+		$(function() {
+		$( "#my_date_picker" ).datepicker();
+		});
+		})
+		</script>
+
+		<!-- end modal for enter message  -->
+		<!-- modal for delete  -->
+		<form id="contactdelete" method="post" action="<?php echo base_url(); ?>admin/profile_delete" onsubmit="setTimeout(function(){window.location.reload();},10);">
+        <div class="modal fade" id="deletecnt" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">
+          Profile Delete</h5>
+
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body"> 
+            
+        <div class="mb-3">
+        <label for="inputName" class="form-label">Status</label>
+        <select id="reason_status" class="form-control custom-select" name="reason_status">
+        <option value="">--select--</option>
+        <option value="Profile Contains Abusive Contents(Vulgar or racist)">Profile Contains Abusive Contents(Vulgar or racist)</option>
+        <option value="Vulgar/Invalid Photos">Vulgar/Invalid Photos</option>
+        <option value="Invalid Data">Invalid Data</option>
+        <option value="Invalid Contact Details">Invalid Contact Details</option>
+        <option value="Contact number/link mentioned in restricted fields">Contact number/link mentioned in restricted fields</option>
+        <option value="Multiple/Duplicate profiles">Multiple/Duplicate profiles</option>
+        <option value="Fake Profiles">Fake Profiles</option>
+        <option value="Abnormal Activity Found">Abnormal Activity Found</option>
+        <option value="Marriage Fixed">Marriage Fixed</option>
+        <option value="Minor Profiles">Minor Profiles</option>
+        <option value="Others">Others</option>
+        </select>
+        </div>
+
+        <div class="mb-3">
+        <label for="inputName" class="form-label">Message</label>
+        <textarea id="message" class="form-control" required="" name="message">
+    &nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?>
+   
+    
+        </textarea>
+        </div>
+        </div>
+        <div class="modal-footer">
+
+        <input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+       <input type="hidden" name="session" 
+       value="<?php echo $this->session->userdata('user_id_admin');?>" id="session">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+        </button>
+       <!--  <button type="submit" class="btn btn-primary">Save changes</button> -->
+
+       <button type="submit" class="btn btn-primary"  id="btn_update<?php echo $get_search_profiles->id; ?>"
+       >Save changes
+       </button>
+
+        </div>
+       
+        </div>
+        </div>
+        </div>
+        </div>
+        </form>
+        
+        <!--Modal for Approve profile-->
+        <form id="approveprofiledata" method="post" action="<?php echo base_url(); ?>admin/profile_approvel" onsubmit="setTimeout(function(){window.location.reload();},500);">
+        <div class="modal fade" id="approveprofile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">
+          Approve Profile</h5>
+
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <div class="modal-body"> 
+            
+        <div class="mb-3">
+        <!--<label for="inputName" class="form-label">Status</label>-->
+        <!--<select id="reason_status" class="form-control custom-select" name="reason_status">-->
+        <!--<option value="">--select--</option>-->
+        <!--<option value="Profile Contains Abusive Contents(Vulgar or racist)">Profile Contains Abusive Contents(Vulgar or racist)</option>-->
+        <!--<option value="Vulgar/Invalid Photos">Vulgar/Invalid Photos</option>-->
+        <!--<option value="Invalid Data">Invalid Data</option>-->
+        <!--<option value="Invalid Contact Details">Invalid Contact Details</option>-->
+        <!--<option value="Contact number/link mentioned in restricted fields">Contact number/link mentioned in restricted fields</option>-->
+        <!--<option value="Multiple/Duplicate profiles">Multiple/Duplicate profiles</option>-->
+        <!--<option value="Fake Profiles">Fake Profiles</option>-->
+        <!--<option value="Abnormal Activity Found">Abnormal Activity Found</option>-->
+        <!--<option value="Marriage Fixed">Marriage Fixed</option>-->
+        <!--<option value="Minor Profiles">Minor Profiles</option>-->
+        <!--<option value="Others">Others</option>-->
+        <!--</select>-->
+        
+        <label for="inputName" class="form-label">Status</label>
+		<select id="reason_status" class="form-control custom-select reason_status" name="reason_status" required="required">
+		<option value="">--select--</option>
+		<option value="Interested To Login">Interested To Login</option>
+		<option value="Others">Others</option>
+		</select>
+		
+        </div>
+
+        <div class="mb-3">
+        <label for="inputName" class="form-label">Message</label>
+        <textarea id="message" class="form-control" required="" name="message">
+    &nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?>
+   
+    
+        </textarea>
+        </div>
+        </div>
+        <div class="modal-footer">
+
+        <input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+       <input type="hidden" name="session" 
+       value="<?php echo $this->session->userdata('user_id_admin');?>" id="session">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+        </button>
+       <!--  <button type="submit" class="btn btn-primary">Save changes</button> -->
+
+       <button type="submit" class="btn btn-primary"  id="btn_update<?php echo $get_search_profiles->id; ?>"
+       >Save changes
+       </button>
+
+        </div>
+       
+        </div>
+        </div>
+        </div>
+        </div>
+        </form>
+
+		<!-- modal for block -->
+		<div class="modal fade" id="block_" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLongTitle">Block Profile</h5>
+		<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+		</button>
+		</div>
+		<div class="modal-body">
+		<div class="mb-3">
+
+		<label for="inputName" class="form-label">Status</label>
+		<select id="block_status" class="form-control custom-select" name="block_status"
+		required="required">
+		<option value="">---select---</option>
+		<option value="Profile Contains Abusive Contents ( Vulgar or racist )">Profile Contains Abusive Contents ( Vulgar or racist )</option>
+		<option value="Vulgar / Invalid Photos">Vulgar / Invalid Photos </option>
+		<option value="Invalid Data">Invalid Data </option>
+		<option value="Invalid Contact Details">Invalid Contact Details</option>
+		<option value="Contact number / link mentioned in restricted fields">Contact number / link mentioned in restricted fields </option>
+		<option value="Multiple / Duplicate profiles">Multiple / Duplicate profiles </option>
+		<option value="Fake Profiles">Fake Profiles</option>
+		<option value="Abnormal Activity Found">Abnormal Activity Found </option>
+		<option value="Marriage Fixed">Marriage Fixed</option>
+		<option value="Minor Profiles">Minor Profiles</option>
+		<option value="Others">Others</option>
+		</select>
+
+		</div>
+
+		<div class="mb-3">
+		<label for="inputName" class="form-label">Message</label>
+		<textarea id="block_description" class="form-control" required="" name="block_description" value="" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?></textarea>
+		</div>
+		</div>
+		<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-primary btnblk_<?php echo $get_search_profiles->id; ?>" id="btnblk_<?php echo $get_search_profiles->id; ?>">Save changes</button>
+		</div>
+		</div>
+		</div>
+		</div>
+		<!-- end of block modal  -->
+		<!-- modal for change password  -->
+
+
+		<!-- modal for unblock -->
+		<div class="modal fade" id="unblock_" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLongTitle">Unblock Profile</h5>
+		<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+		</button>
+		</div>
+		<div class="modal-body">
+		<div class="mb-3">
+		<label for="inputName" class="form-label">Status</label>
+		<select id="block_status" class="form-control custom-select block_status" name="block_status" required="required">
+		<option value="">--select--</option>
+		<option value="Interested To Login">Interested To Login</option>
+		<option value="Others">Others</option>
+		</select>
+		<input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+		<input type="hidden" value="<?php echo $this->session->userdata('user_id_admin');?>" id="session">
+		<input type="hidden" name="phone" id="phone" value="<?php echo $get_search_profiles->phone; ?>">
+		</div>
+
+		<div class="mb-3">
+		<label for="inputName" class="form-label">Message</label>
+		<textarea id="block_description" class="form-control block_description" required="required" name="block_description" value="" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<?php echo $this->session->userdata('username');?></textarea>
+		</div>
+		</div>
+		<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-primary" id="btnunblk_<?php echo $get_search_profiles->id; ?>">Save changes</button>
+		</div>
+		</div>
+		</div>
+		</div>
+		<!-- end of unblock modal  -->
+       
+        <div class="modal fade" id="dispear" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLongTitle">Hide Profile 								
+
+			</h5>
+			<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+			</div>
+
+			<div class="modal-body">
+			<input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+			<input type="hidden" value="<?php echo $this->session->userdata('user_id_admin');?>" id="session"> 
+			<div class="mb-3">
+			<p>
+			Are you sure to hide this profile ..!
+			</p>
+			<label for="inputName" class="form-label">Message</label>	 
+	          <textarea id="hide_description" class="form-control" required="" name="hide_description" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?>		
+			</textarea>
+			</div>
+
+			</div>
+			<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary btnhide_<?php echo $get_search_profiles->id; ?>" 
+			id="btnhide_<?php echo $get_search_profiles->id; ?>">Hide</button>
+			</div>
+			</div>
+			</div>
+			</div>
+		<!-- end of hide modal  -->
+		<!-- modal for unhide -->
+
+		<div class="modal fade" id="display" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLongTitle">Unhide Profile 								
+
+						 </h5>
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+
+			<div class="modal-body">
+			<input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+			<input type="hidden" value="<?php echo $this->session->userdata('user_id_admin');?>" id="session"> 
+			<div class="mb-3">
+			<p> Are you sure to unhide this profile ..! </p>
+			<label for="inputName" class="form-label">Message</label>
+			<textarea id="hide_description" class="form-control hide_description" required="" name="hide_description" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?></textarea>
+
+			</div>
+
+			</div>
+
+		<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-primary" id="btnunhide_<?php echo $get_search_profiles->id; ?>">UnHide</button>
+		</div>
+		</div>
+		</div>
+		</div>
+        <!-- end modal for unhide -->
+		<div class="modal fade" id="changepassword" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLongTitle">Change password</h5>
+		<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+		</button>
+		</div>
+		<div class="modal-body">
+
+		<input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+		<input type="hidden" value="<?php echo $this->session->userdata('user_id_admin');?>" id="session"> 
+		<div class="mb-3">
+		<label for="inputName" class="form-label">Enter Password</label>
+		<input id="password" class="form-control" required="" name="password" value="" type="text"></input>
+		</div>
+		</div>
+		<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-primary" id="changepassbtn_<?php echo $get_search_profiles->id;?>">Save changes</button>
+		</div>
+		</div>
+		</div>
+		</div>
+
+
+		<?php $msg=$this->db->select('*')->from('tbl_payement')->where('user_id',$r_id)->where('status','1')->get()->result_array();?>
+
+		<!-- end modal for change password -->
+		<!-- modal for approved to pay  -->
+
+
+			<form id="contactpaid" method="post" action="<?php echo base_url();?>admin/approvetopaid5"
+			onsubmit="setTimeout(function(){window.location.reload();},500);">
+			<div class="modal fade" id="approvetopaid" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLongTitle">Approve to Paid</h5>
+			<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+			</div>
+			<br>
+			<div>
+
+
+			<span style="margin-left: 14px;border:2px solid black;color:black;background-color:#FEEAEA;">
+			&nbsp;&nbsp; 
+			<?php foreach ($msg as  $value) {
+			?>
+			<?php $paymentstatus=$value['status'];?>
+
+
+
+			<?php if($paymentstatus=='1')
+			{?>
+			<?php echo "Paid";?>
+			<?php }?>
+
+
+			<?php if($paymentstatus=='0')
+			{?>
+			<?php echo "Expired";?>
+			<?php }?>
+
+
+			&nbsp;&nbsp;&nbsp;
+			<?php }?>
+			</span>
+
+
+
+			<span style="margin-left: 30px;border:2px solid black;color:black;background-color:#FEEAEA;">
+			&nbsp;&nbsp; 
+			<?php foreach ($msg as $msg5) {
+			?>
+
+			<?php $msg8=$msg5['messagebalance'];?>	
+
+
+			<?php echo $msg8;?>
+
+			&nbsp;&nbsp;<?php }?>
+			</span>
+			<span 
+			style="margin-left:20px;border:2px solid black;color:black;background-color:#FEEAEA;">
+			&nbsp;&nbsp;
+			<?php foreach ($msg as $msg5) {
+			?>
+			<?php $msg9=$msg5['contactbalance'];?>	
+			<?php echo $msg9;?>&nbsp;&nbsp;<?php }?>
+
+			</span>
+			<span style="margin-left: 30px;border:2px solid black;color:black;
+			background-color:#FEEAEA;">
+
+			<?php $exp=$this->db->select('*')->from('tbl_payement')->where('user_id',$r_id)
+			->where('status','1')->get()->result_array();?>
+
+			&nbsp;    <?php foreach ($exp as $msdata) {
+			?>
+			<!-- Expired on  -->
+			<?php $msg10=$msdata['expiry_date'];?>	
+			<?php $regdateold=date('d-m-Y',strtotime($msg10));?>
+
+
+
+
+			<?php echo $regdateold;?>
+			&nbsp;&nbsp; 
+
+			<?php }?>
+			</span>
+
+			</div>
+			<br>
+			<div style="border:2px solid black;color:white;margin-top:10px;background-color:grey;">
+			&nbsp;&nbsp; <b>Paid Membership</b>
+			</div>
+
+			<div class="modal-body">
+			<table class="table table-bordered">
+
+			<tbody>
+			<tr>
+			<td><b>Order ID :</b> </td>
+			<td>
+			<!-- AMIT 1635 -->
+			<?php echo $r_id;?>
+			</td>
+
+			</tr>
+			<tr>
+			<td><b>HN ID :</b></td>
+			<td>
+
+			<!-- HN10001 -->
+			<?php echo	$happynikah_id;?>
+			</td>
+
+			</tr>
+			<tr>
+			<td><b>Activation Date :</b></td>
+			<td>
+			<?php $tdate=date('d-m-Y');?>
+			<?php echo $tdate;?>
+			</td>
+
+			</tr>
+			<tr>
+			<td><b>Plan :</b></td>
+			<td>
+
+			<?php $plandata=$this->db->select('*')->from('tbl_plan')->get()->result_array();?>
+
+			<select class="form-control" id="sel_plan" name="sel_plan">
+			<option>-- Select --</option>
+			<?php
+			foreach($plandata as $plan2){
+			echo "<option value='".$plan2['plan_id']."'>".$plan2['plan_name']."</option>";
+			}
+			?>
+			</select>
+
+											<!-- <option>
+												--select--
+											</option>
+											<option value="">
+												Bronze
+											</option>
+											<option value="">
+												Diamond
+											</option>
+											<option value="">
+												Crown
+											</option>
+											<option value="">
+												Master
+											</option>
+											<option value="">
+												Assisted
+											</option>
+											<option value="">
+												Assisted Pro
+											</option>
+											<option value="">
+												Elite
+											</option> -->
+
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>Duration :</b></td>
+					<td>
+
+					<!-- 45 days -->
+
+					<select class="form-control" id="sel_duration" name="sel_duration">
+					<option hidden></option>
+
+					</select>
+
+
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>No of Contacts :</b></td>
+					<td>
+					<!-- 20 -->
+					<select class="form-control" id="sel_contact" name="sel_contact">
+					<option hidden></option>
+					</select>
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>No of Messages :</b></td>
+					<td>
+					<!-- 20 -->
+					<select class="form-control" id="sel_message" name="sel_message">
+					<option hidden></option>
+					</select>
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>Amount :</b></td>
+					<td>
+					<!-- 1800 -->
+					<select class="form-control" id="sel_amount" name="sel_amount">
+					<option hidden></option>
+					</select>
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>Discount :</b></td>
+					<td>
+					<input type="number" name="chDiscount" id="chDiscount" class="form-control">
+					</td>
+
+					</tr>
+
+
+					<!-- <tr>
+					<td><b>Result :</b></td>
+					<td>
+					<input type="number" id="result">
+					</td>
+
+					</tr> -->
+
+
+					<tr>
+					<td><b>Final Amount :</b></td>
+					<td>
+
+					<!-- 999 -->
+					<input class="form-control" type="number" id="final_amount" 
+					name="final_amount" readonly="readonly">
+					<!-- <option hidden></option>
+					</select> -->
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>Sale Amount :</b></td>
+					<td>
+					<!-- 999 -->
+
+					<!-- <select class="form-control" id="final_amount2" name="final_amount2">
+					<option hidden></option>
+					</select> -->
+
+				    <input class="form-control" type="number" id="final_amount2" 
+					name="final_amount2" readonly="readonly">
+
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>Details :</b></td>
+					<td>
+					<textarea class="form-control"  name="details" 
+					id="details" style="height: 0px;">
+
+					</textarea>
+					</td>
+
+					</tr>
+					<tr>
+					<td><b>Payment Mode :</b></td>
+					<td>
+					<select class="form-control" name="payment_mode" id="payment_mode">
+					<option>
+					--Select--
+					</option>
+					<option name="payment_mode" id="payment_mode" value="Office payment">
+					Office payment
+					</option>
+					<option name="payment_mode" id="payment_mode" value="Bank Deposit">
+					Bank Deposit
+					</option>
+					<option name="payment_mode" id="payment_mode" value="Online Payment">
+					Online Payment
+					</option>
+					<option name="payment_mode" id="payment_mode" value="Door Step">
+					Door Step
+					</option>
+					<option name="payment_mode" id="payment_mode" value="Money Exchange">
+					Money Exchange
+					</option>
+					</select>
+					</td>
+
+					</tr>
+					<tr  id="office">
+					<td><b>Office Name :</b></td>
+					<td>
+					<select class="form-control">
+					<option>
+					kakkanchery
+					</option>
+					</select>
+					</td>
+
+					</tr>
+					<tr id="bank">
+					<td><b>Bank Deposit :</b></td>
+					<td>
+					<select class="form-control" >
+					<option>
+					Direct
+					</option>
+					</select>
+					</td>
+
+					</tr>
+					<tr id="bank2">
+					<td><b>Bank Name :</b></td>
+					<td>
+					<select class="form-control">
+					<option>
+					Indian Bank
+					</option>
+					</select>
+					</td>
+
+					</tr>
+					<tr id="bank3">
+					<td><b>Online Payment :</b></td>
+					<td>
+					<select class="form-control">
+					<option value="Razor Pay" name="">
+					Razor Pay
+					</option>
+					<option value="Iphone Payment" name="">
+					Iphone Payment
+					</option>
+
+					</select>
+					</td>
+
+
+					</tr>
+					<tr id="bank4">
+					<td><b>Staff Name :</b></td>
+					<td>
+					<select class="form-control" name="staff_name">
+					<option name="staff_name" value="asif">
+					Asif - Vadakara
+					</option>
+					<option name="staff_name" value="other">
+					others
+					</option>
+					</select>
+					</td>
+
+					</tr>
+					<tr id="bank5">
+					<td><b>Number :</b></td>
+					<td>
+					<input class="form-control" type="text" name="number" placeholder="Enter number">
+					</td>
+
+					</tr>
+
+
+					</tbody>
+					</table>
+					
+
+					</div>
+				<div class="modal-footer">
+				<input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+				<input type="hidden" name="session" 
+				value="<?php echo $this->session->userdata('user_id_admin');?>" id="session">
+
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-primary">Submit</button>
+					</div>
+					</div>
+					</div>
+					</div>
+				    </form>
+				    
+			
+			
+		<!--Modal for active offer-->
+		
+		
+			<form id="activeofferform" method="post" action="<?php echo base_url();?>admin/approvetopaidactive" onsubmit="setTimeout(function(){window.location.reload();},600);">
+			<div class="modal fade" id="activeoffer" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+			<div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLongTitle">Active Offer</h5>
+			<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+			</div>
+			<br>
+			<div>
+
+
+		
+
+			</div>
+			<br>
+			<div style="border:2px solid black;color:white;margin-top:10px;background-color:grey;">
+			&nbsp;&nbsp; <b>Paid Membership</b>
+			</div>
+
+			<div class="modal-body">
+			<table class="table table-bordered">
+
+			<tbody>
+			
+			<tr>
+			<td><b>HN ID :</b></td>
+			<td>
+
+			<!-- HN10001 -->
+			<?php echo	$happynikah_id;?>
+			</td>
+
+			</tr>
+			<tr>
+			<td><b>Activation Date :</b></td>
+			<td>
+			<?php $tdate=date('d-m-Y');?>
+			<?php echo $tdate;?>
+			</td>
+
+			</tr>
+			<tr>
+			<td><b>Plan :</b></td>
+			<td>
+
+			<?php $plandata=$this->db->select('*')->from('tbl_plan as pl')->get()->result_array();?>
+
+			<select class="form-control" id="sel_plan_active_offer" name="sel_plan">
+			<option>-- Select --</option>
+			<?php
+			foreach($plandata as $plan2){
+			echo "<option value='".$plan2['plan_id']."'>".$plan2['plan_name']."</option>";
+			}
+			?>
+			</select>
+
+											<!-- <option>
+												--select--
+											</option>
+											<option value="">
+												Bronze
+											</option>
+											<option value="">
+												Diamond
+											</option>
+											<option value="">
+												Crown
+											</option>
+											<option value="">
+												Master
+											</option>
+											<option value="">
+												Assisted
+											</option>
+											<option value="">
+												Assisted Pro
+											</option>
+											<option value="">
+												Elite
+											</option> -->
+
+					</td>
+
+					</tr>
+				
+				
+					
+					<tr>
+					<td><b>Amount :</b></td>
+					<td>
+					<!-- 1800 -->
+				<select class="form-control" id="sel_amount2" name="sel_amount2">
+					<!--<option hidden></option>-->
+					<option>-- Select Amount --</option>
+					</select>
+					</td>
+
+					</tr>
+				
+				
+
+
+					<!-- <tr>
+					<td><b>Result :</b></td>
+					<td>
+					<input type="number" id="result">
+					</td>
+
+					</tr> -->
+
+
+					</tbody>
+					</table>
+					
+
+					</div>
+				<div class="modal-footer">
+				<input type="hidden" name="user_id" id="user_id" value="<?php echo $get_search_profiles->id;?>">
+				<input type="hidden" name="session" 
+				value="<?php echo $this->session->userdata('user_id_admin');?>" id="session">
+
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-primary">Submit</button>
+					</div>
+					</div>
+					</div>
+					</div>
+				    </form>
+				    
+				    
+				    
+		<!-- end modal of approve to paid  -->
+		<!-- modal for postpone  -->
+		
+				<form id="contact" method="post" action="<?php echo base_url(); ?>admin/payment_request">
+				    
+		<div class="modal fade" id="postpone" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLongTitle">Payment Request</h5>
+						<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					
+	
+
+               <input type="hidden" name="payment_id" id="payment_id"  
+               value="<?php echo $get_search_profiles->id;?>">
+               
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="inputName" class="form-label" style="color:black;"><b>Plan Type</b></label>
+							<select id="plantype" class="form-control custom-select" 
+							name="plantype">
+								<option value="">--select--</option>
+								<option value="normal">Normal</option>
+								<option value="premium">Premium</option>
+
+						</select>
+						</div>
+						<div class="mb-3">
+						<label for="inputName" class="form-label" style="color: black;">
+						<b>Membership Plan</b></label>
+						<select id="membership_plan" class="form-control custom-select" name="membership_plan">
+								<option value="">--select--</option>
+								<option value="1">Bronze</option>
+								<option value="2">Diamond</option>
+								<option value="3">Crown</option>
+								<option value="4">Master</option>
+								<option value="5">Assisted</option>
+								<option value="6">Assited Pro</option>
+								<!--<option value="">Elite</option>-->
+							</select>
+						</div>
+						<div class="mb-3">
+						<label for="inputName" class="form-label" style="color: black;"><b>PostPone Date</b></label>
+						<input type="date" name="postpone_date" class="form-control">
+						</div>
+
+						<div class="mb-3">
+						<label for="inputName" class="form-label" style="color: black;">
+							<b>Message</b></label>
+							<textarea id="message" class="form-control" required="" name="message">
+								
+								    &nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->session->userdata('username');?>
+								    
+							</textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-primary">Sumbit</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		</form>
+		
+		<!--Invalid ID/phone-->
+		
+<!--		<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title text-success" id="searchModalLabel"></h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		        </div>
+		        <div class="modal-body">
+		            
+               
+		        <h5>Please Enter Valid ID or Phone Number </h5>
+		      
+		       </div>
+		       <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>-->
+		
+		
+		<!-- end of postpone modal  -->
+		<!-- modal for Duplicate profile  -->
+		<div class="modal fade" id="duplicate" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Duplicate Profile
+					</h5>
+					<button type="button" class="close" data-bs-dismiss="modal" 
+					aria-label="Close">
+					
+				<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+				<div class="modal-body">
+				<div class="table-wrapper-scroll-y my-custom-scrollbar" style="height: 375px;">
+				<div>
+				<table class="table table-bordered">
+
+				<tbody>
+             
+             <?php if($get_search_profiles->status == '1' || $get_search_profiles->status == '2' || 
+             $get_search_profiles->status == '3')
+            
+            {?> 
+             
+			<?php $nh=$this->db->select('*')->from('tbl_registration')->order_by('id','desc')->where('phone',$phone)
+			->get()->result_array();?>
+			<?php  foreach ($nh as  $value)
+			 {
+
+				$k=$value['phone'];?>
+				<?php $k2=$value['status'];?>
+				<?php $k3=$value['happynikah_id'];?>
+				<?php $k4=$value['reg_date'];?>
+				<?php $k5=$value['name'];?>
+				<?php $k6=$value['gender'];?>
+				<?php $k7=$value['age'];?>
+				<?php $k8=$value['marital_status'];?>
+				<?php $k9=$value['photo'];?>
+				<?php $k10=$value['dob'];?>
+
+	<!--  <?php echo $k;?> -->
+
+  <?php 
+                if ($k2 == '0')
+				{
+				$status = "Pending";
+				} 
+				elseif ($k2 == '1')
+				{
+				$status = "Approved";
+				} 
+				elseif ($k2 == '2') 
+				{
+				$status = "Rejected";
+				} 
+				elseif ($k2 == '3') 
+				{
+				$status = "Deleted";
+				}
+				elseif ($k2 == '4') 
+				{
+				$status = "Block";
+				}
+				elseif ($k2 == '5')
+				{
+				$status = "UnBlock";
+				}
+
+				?>
+
+				<tr>
+				<td>
+
+		<?php $url="https://happynikah.com/";?>
+         
+         <img class="profile-image" src="<?php echo $url.'assets/photo_storage/'. $k9;?>" alt="" 
+         width="150" height="auto" alt="Select Image">
+			
+				</td>
+				<td style="color: red;">
+
+				Status: <?php echo $status; ?> 
+				</td>
+				<td style="color: red;" colspan="2"> 
+
+				Display Status :
+				<?php echo $status; ?>
+				</td>
+
+				</tr>
+				<tr>
+				<td>
+				<b>HN ID :</b>
+				</td>
+				<td><?php echo $k3; ?></td>
+				<td><b>Register Date & Time :</b></td>
+				<td><?php echo $k4; ?></td>
+				</tr>
+				<tr>
+				<td><b>Name<font style="color: red;">*</font> :</b></td>
+				<td><?php echo $k5; ?></td>
+				<td><b>Gender<font style="color: red;">*</font> :</b></td>
+				<td><?php echo $gender; ?></td>
+				</tr>
+				<tr>
+				<td><b>Age :</b></td>
+				<td><?php echo $k7; ?></td>
+				<td><b>Date of Birth<font style="color: red;">*</font> :
+				</b></td>
+				<td>
+				  <?php $k11=date('d-m-Y',strtotime($k10)); ?>   
+				<?php echo $k11; ?></td>
+
+				</tr>
+				<tr>
+				<td><b>Mobile :</b></td>
+				<td><?php echo $k; ?></td>
+				<td><b>Marital Status :</b></td>
+				<td><?php echo $k8; ?></td>
+
+				</tr>
+
+
+<!-- <?php $df="SELECT * FROM tbl_registration GROUP BY phone HAVING COUNT(*)>1";?>
+<?php print_r($df);?> -->
+
+            <?php }?>
+            
+            <?php }?>
+			</tbody>
+			</table>
+
+			</div>
+
+			</div>
+			</div>
+			<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+			Close
+		    </button>
+						<!-- <button type="button" class="btn btn-primary">Sumbit</button> -->
+			</div>
+			</div>
+			</div>
+			</div>
+		<!-- end of Duplicate profile modal  -->
+		<!-- modal for interest details  -->
+		<div class="modal fade" id="interestdetails" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Interest Details 
+					</h5>
+				
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+
+						<div class="table-wrapper-scroll-y my-custom-scrollbar">
+
+							<table class="table table-bordered table-striped mb-0">
+								<thead>
+		<h3 style="height: 50px;background-color:#a0d9ff;padding-top:7px;">
+		    
+		 <?php $interest=$this->db->select('*')->from('tbl_interest')->where('sender_id',$r_id)->where('status',0)->get()->num_rows();?>
+	    Pending Interest: <?php echo $interest;?></h3>
+								</thead>
+
+								<br>
+								<tbody>
+								    
+					<?php $interest_details=$this->db->select('tbl_interest.*,tbl_registration.*')->from('tbl_interest')
+					->join('tbl_registration','tbl_registration.id=tbl_interest.receiver_id')
+					->where('tbl_interest.sender_id',$r_id)->where('tbl_interest.status',0)->get()->result_array();?>
+					
+					<?php foreach($interest_details as $interstdata)
+					{?>
+									<tr>
+
+										<td><?php echo $interstdata['happynikah_id'];?> - <?php echo $interstdata['date'];?></td>
+										<!--<td>HB100002- 21-01-2023 10:00 PM</td>-->
+
+									</tr>
+                                 <?php }?>
+								</tbody>
+							</table>
+
+						</div>
+
+
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- end modal for Interest details  -->
+		<?php include('footer.php'); ?>
+
+
+    <link href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/ui-lightness/jquery-ui.css' rel='stylesheet'>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" >
+    </script>
+      
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" >
+    </script>
+
+
+		<!-- jQuery -->
+<!-- 		<script src="<?php echo base_url() ?>assets/plugins/jquery/jquery.min.js"></script>
+ -->		<!-- Bootstrap 4 -->
+		<!-- <script src="<?php echo base_url() ?>assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script> -->
+		<!-- DataTables  & Plugins -->
+	   <script src="<?php echo base_url() ?>assets/plugins/datatables/jquery.dataTables.min.js">
+			
+	</script>
+		<script src="<?php echo base_url() ?>assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js">
+			
+		</script>
+		<script src="<?php echo base_url() ?>assets/plugins/datatables-responsive/js/dataTables.responsive.min.js">
+			
+		</script>
+		<script src="<?php echo base_url() ?>assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js">
+			
+		</script>
+
+		<!-- <script src="<?php echo base_url() ?>assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+			<script src="<?php echo base_url() ?>assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script> -->
+		<script src="<?php echo base_url() ?>assets/plugins/jszip/jszip.min.js">
+			
+		</script>
+		<script src="<?php echo base_url() ?>assets/plugins/pdfmake/pdfmake.min.js">
+			
+		</script>
+		<script src="<?php echo base_url() ?>assets/plugins/pdfmake/vfs_fonts.js">
+			
+		</script>
+		<!-- <script src="<?php echo base_url() ?>assets/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+			<script src="<?php echo base_url() ?>assets/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+			<script src="<?php echo base_url() ?>assets/plugins/datatables-buttons/js/buttons.colVis.min.js"></script> -->
+
+
+		<script>
+		   function ShowPayment() {
+			const targetDiv = document.getElementById("prepaymentdetails");
+				if (targetDiv.style.display !== "none") 
+			 	{
+		 		 targetDiv.style.display = "none";
+				} 
+				else
+				 {
+					targetDiv.style.display = "block";
+				}
+			
+			}	
+			var url = '<?php echo base_url() ?>'
+
+			function approve_pay(r_id) {
+				$.ajax({
+					type: 'POST',
+					url: url + 'admin/approve_pay',
+					data: {
+						r_id: r_id
+					},
+					success: function(data) {
+						$('#approveform').html(data)
+					},
+				})
+			}
+
+
+			//datatable for message
+			function openCity(evt, cityName) {
+				var i, tabcontent, tablinks;
+				tabcontent = document.getElementsByClassName("tabcontent");
+				for (i = 0; i < tabcontent.length; i++) {
+					tabcontent[i].style.display = "none";
+				}
+				tablinks = document.getElementsByClassName("btn btn-primary");
+				for (i = 0; i < tablinks.length; i++) {
+					tablinks[i].className = tablinks[i].className.replace(" active", "");
+				}
+				document.getElementById(cityName).style.display = "block";
+				evt.currentTarget.className += " active";
+			}
+			//entermessage modal jquery//
+
+			$(function() {
+				$("a[class='asm']").click(function() {
+					$("#enterMessage").modal("show");
+					return false;
+				});
+			});
+			$(function() {
+				$("a[class='asms']").click(function() {
+				$("#deletecnt").modal("show");
+				// const deleteId = $(this).attr('data-id');
+				// const field = $('#deleteId');
+				// field.val(deleteId);
+				// console.log(field[0]); 
+
+				return false;
+				});
+			});
+			
+            $(function() {
+            $("a[class='asms5']").click(function() {
+            
+            $("#approveprofile").modal("show");
+            // const deleteId = $(this).attr('data-id');
+            // const field = $('#deleteId');
+            // field.val(deleteId);
+            // console.log(field[0]); 
+            
+            return false;
+            });
+			});
+			
+			$(function() {
+				$("a[class='bl']").click(function() {
+					$("#block").modal("show");
+					return false;
+				});
+			});
+
+			$(function() {
+				$("a[class='ps']").click(function() {
+					$("#changepassword").modal("show");
+					return false;
+				});
+			});
+			
+			$(function() {
+				$("a[class='ap']").click(function() {
+					$("#approvetopaid").modal("show");
+					return false;
+				});
+			});
+			
+				$(function() {
+				$("a[class='active_offer']").click(function() {
+					$("#activeoffer").modal("show");
+					return false;
+				});
+			});
+			
+			
+			$(function() {
+				$("a[class='pp']").click(function() {
+					$("#postpone").modal("show");
+					return false;
+				});
+			});
+			
+			$(function() {
+				$("button[class='btn btn-danger dp']").click(function() {
+					$("#duplicate").modal("show");
+					return false;
+				});
+			});
+            
+            $(function() {
+		$("a[class='bbb']").click(function() {
+		$("#block_").modal("show");
+		return false;
+		});
+		});
+		$(function() {
+		$("a[class='bbc']").click(function() {
+		$("#unblock_").modal("show");
+		return false;
+		});
+		});
+
+			$(function() {
+			//var id = $("")
+			$("a[class='hi']").click(function() {
+			$("#dispear").modal('show');
+			return false;
+			});
+			});
+			$(function() {
+			$("a[class='hello']").click(function() {
+			$("#display").modal('show');
+			return false;
+			});
+			});
+
+			$(function() {
+			$("a[class='id']").click(function() {
+			$("#interestdetails").modal("show");
+			return false;
+			});
+
+			});
+
+  $(document).ready(function(){
+	  // City change
+    $('#sel_plan').change(function(){
+      var plandata_id5 = $(this).val();
+
+      // AJAX request
+      $.ajax({
+        url:'<?=base_url()?>admin/getplan',
+        method: 'post',
+        data: {plandata_id: plandata_id5},
+        dataType: 'json',
+        success: function(response){
+
+          // Remove options 
+          // $('#sel_user').find('option').not(':first').remove();
+		$('#sel_duration').find('option').not(':first').remove();
+		$('#sel_contact').find('option').not(':first').remove();
+		$('#sel_message').find('option').not(':first').remove();
+		$('#sel_amount').find('option').not(':first').remove();
+		$('#final_amount').find('option').not(':first').remove();
+		$('#final_amount2').find('option').not(':first').remove();
+          // Add options
+          $.each(response,function(index,data){
+            // $('select>option:eq(1)').prop('selected', true);
+           
+            
+            $('#sel_duration').append('<option selected value="'+data['plan_id']+'">'+data['duration']+'</option>');
+            $('#sel_contact').append('<option selected value="'+data['plan_id']+'">'+data['contacts']+'</option>');
+            
+            $('#sel_message').append('<option selected value="'+data['plan_id']+'">'+data['messages']+'</option>');
+            
+            $('#sel_amount').append('<option selected value="'+data['plan_strick_amount']+'">'+data['plan_strick_amount']+'</option>');
+            $('#final_amount').append('<option selected value="'+data['plan_id']+'">'+data['plan_amount']+'</option>');
+            
+            $('#final_amount2').append('<option selected value="'+data['plan_id']+'">'+data['plan_amount']+'</option>');
+
+			});
+			}
+			});
+			});
+			});
+			
+			
+		
+		
+		$(document).ready(function(){
+	  // City change
+    $('#sel_plan_active_offer').change(function(){
+      var plandata_id7 = $(this).val();
+    
+    
+      // AJAX request
+      $.ajax({
+        url:'<?=base_url()?>admin/getplanactiveoffer',
+        method: 'post',
+        data: {planid: plandata_id7},
+        dataType: 'json',
+        success: function(response){
+
+          // Remove options 
+          // $('#sel_user').find('option').not(':first').remove();
+	
+		$('#sel_amount2').find('option').not(':first').remove();
+	
+          // Add options
+          $.each(response,function(index,data){
+            // $('select>option:eq(1)').prop('selected', true);
+           
+            $('#sel_amount2').append('<option value="'+data['amount']+'">'+data['amount']+'</option>');
+          
+
+			});
+			}
+			});
+			});
+			});	
+			
+			
+    
+			// $(document).ready(function() 
+			// {
+
+			// $(function() {
+
+			// // $('#date').datepicker({
+			// // maxDate: "+2d",
+			// // minDate:0
+			// // });
+
+			// });
+			// })
+
+		
+			$(document).ready(function () 
+			{   
+			// $('body').on('change','#status', function() 
+			// $('#status').change(function() {
+			// {
+			// $('#show_only').val(this.value==);
+
+
+			// var status=$("#status").val();
+			// $( "#noSunday" ).datepicker({ 
+			// beforeShowDay: noSunday,
+			// maxDate: "+2d",
+			// minDate:0
+			// });
+
+			// function noSunday(date)
+			// { 
+			// var day = date.getDay(); 
+			// return [(day > 0), '']; 
+			// }; 
+
+			$("#noSunday").datepicker({ 
+			beforeShowDay: noSunday,
+			dateFormat: 'dd-mm-yy',
+			maxDate: "+2d",
+			minDate:0
+			});
+
+			function noSunday(date)
+			{ 
+			var day = date.getDay(); 
+			return [(day > 0), '']; 
+			}; 
+
+			$("#noSunday2").datepicker({ 
+			beforeShowDay: noSunday2,
+			 dateFormat: 'dd-mm-yy',
+			 
+			maxDate: "+1d",
+			minDate:0
+			});
+
+			function noSunday2(date)
+			{ 
+			var day = date.getDay(); 
+			return [(day > 0), '']; 
+			}; 
+
+			});
+			// }); 
+
+	// $('#status').change(function()
+	// {
+	// if($(this).val() == 'Interested')
+	// { 
+
+	// $('#follow2').hide();
+	// }
+
+	// if($(this).val() == 'Ring')
+	// { 
+	// $('#follow2').show();
+
+	// }
+	// });
+
+ // $("#save-project-btn").click(function(event )
+ //    {
+ //        event.preventDefault();
+ //        if($("#update_id").val() == null || $("#update_id").val() == "")
+ //        {
+           
+        
+ //            updateProject();
+ //        }
+ //    })
+
+	//  function updateProject()
+ //    {
+ //        $("#save-project-btn").prop('disabled', true);
+ //        let url = $('meta[name=app-url]').attr("content") + "index.php/admin/followup_register/" + $("#update_id").val();
+ //        let data = {
+ //            // id: $("#update_id").val(),
+ //            status: $("#status").val(),
+ //            noSunday: $("#noSunday").val(),
+ //            noSunday2: $("#noSunday2").val(),
+ //            message: $("#message").val(),
+ //            uid: $("#update_id").val(),
+ //        };
+ //        $.ajax({
+ //            url: url,
+ //            type: "POST",
+ //            data: data,
+ //            success: function(response) {
+ //                $("#save-project-btn").prop('disabled', false);
+ //                let successHtml = '<div class="alert alert-success" role="alert"><b>Project Updated Successfully</b></div>';
+ //                $("#alert-div").html(successHtml);
+ //                $("#status").val("");
+ //                $("#message").val("");
+ //                $("#update_id").val("");
+ //                $("#noSunday").val("");
+
+ //                // showAllProjects();
+ //                $("#form-modal").modal('hide');
+ //            },
+ //            error: function(response) {
+ //                /*
+ //                    show validation error
+ //                */
+ //                $("#save-project-btn").prop('disabled', false);
+            
+ //                let responseData = JSON.parse(response.responseText);
+ //                console.log(responseData.errors);
+ 
+ //                if (typeof responseData.errors !== 'undefined') 
+ //                {
+ //                    let errorHtml = '<div class="alert alert-danger" role="alert">' +
+ //                                        '<b>Validation Error!</b>' +
+ //                                        responseData.errors +
+ //                                    '</div>';
+ //                    $("#modal-alert-div").html(errorHtml);      
+ //                }
+ //            }
+ //        });
+ //    }
+
+     $(document).ready(function () 
+     {
+     $('#contact select[name="status"]').change(function () 
+     {
+        if ($('#contact select[name="status"] option:selected').val() == 'Ring')
+        {
+            $('#follow').hide();
+            $('#follow2').show();
+        } 
+         if ($('#contact select[name="status"] option:selected').val() == 'Interested')
+        {
+            $('#follow2').hide();
+            $('#follow').show();
+        }
+         if ($('#contact select[name="status"] option:selected').val() == 'busy')
+        {
+            $('#follow').hide();
+            $('#follow2').show();
+        } 
+
+         if ($('#contact select[name="status"] option:selected').val() == 'Add comments')
+        {
+          $('#follow').hide();
+          $('#follow2').show();
+        } 
+
+		if ($('#contact select[name="status"] option:selected').val() == 'Switched')
+		{
+		$('#follow').hide();
+		$('#follow2').show();
+		}  
+
+		// else {
+		//     $('#follow').hide();
+		// }
+		});
+
+       
+        $('#contactpaid select[name="payment_mode"]').change(function () 
+       {
+        if ($('#contactpaid select[name="payment_mode"] option:selected').val() == 'Office payment')
+        {
+            $('#office').show();
+			$('#bank').hide();
+			$('#bank2').hide();
+			$('#bank3').hide();
+			$('#bank4').hide();
+			$('#bank5').hide();
+            // $('#follow2').show();
+        } 
+
+      if($('#contactpaid select[name="payment_mode"] option:selected').val() == 'Bank Deposit')
+        {
+            $('#office').hide();
+			$('#bank').show();
+			$('#bank2').show();
+			$('#bank3').hide();
+			$('#bank4').hide();
+			$('#bank5').hide();
+            // $('#follow2').show();
+        } 
+
+   if ($('#contactpaid select[name="payment_mode"] option:selected').val() == 'Online Payment')
+        {
+            $('#office').hide();
+			$('#bank').hide();
+			$('#bank2').hide();
+			$('#bank3').show();
+            // $('#follow2').show();
+        } 
+
+        if ($('#contactpaid select[name="payment_mode"] option:selected').val() == 'Door Step')
+        {
+            $('#office').hide();
+			$('#bank').hide();
+			$('#bank2').hide();
+			$('#bank3').hide();
+			$('#bank4').show();
+			$('#bank5').show();
+            // $('#follow2').show();
+        } 
+
+          if ($('#contactpaid select[name="payment_mode"] option:selected').val() == 'Money Exchange')
+        {
+            $('#office').hide();
+			$('#bank').hide();
+			$('#bank2').hide();
+			$('#bank3').hide();
+			$('#bank4').hide();
+			$('#bank5').show();
+            // $('#follow2').show();
+        } 
+       });
+	   
+	   });
+
+
+		$(document).on("change keyup blur", "#chDiscount", function() 
+		{
+		var amd = $('#sel_amount').val();
+		var disc = $('#chDiscount').val();
+		
+
+		if (disc != '' && amd != '')
+		{
+		$('#final_amount').val((parseInt(amd)) - (parseInt(disc)));
+		$('#final_amount2').val((parseInt(amd)) - (parseInt(disc)));
+		}
+		else
+		{
+		$('#final_amount').val(parseInt(amd));
+		$('#final_amount2').val(parseInt(amd));
+		}
+		});
+
+   </script>
+
+   <script type="text/javascript">
+	function hideprofile(){
+		var url = '<?php echo base_url() ?>'
+		var user_id = $('#user_id').val();
+		var emp_id= $('#session').val();
+		
+	 $("#btnhide_"+user_id).click(function(){
+		var hide_description= $('#hide_description').val();
+	//	console.log(hide_description);
+		$("#dispear").modal('hide');
+		setTimeout(function(){
+		location.reload(); 
+		}, 1000);
+
+		$.ajax({
+		dataType: 'text',
+		type: 'POST',
+		url: url + 'admin/hide_profile',
+		data: {
+		user_id: user_id,
+		emp_id: emp_id,
+		hide_description:hide_description	
+		},
+		success: function(result2) {
+		},
+		})
+		});				
+		}
+
+	</script>
+	<script type="text/javascript">
+		function unhideprofile(){
+		var url = '<?php echo base_url() ?>'
+		var user_id = $('#user_id').val();
+		var emp_id= $('#session').val();
+		
+		$("#btnunhide_"+user_id).click(function()
+		{
+		
+		var hide_description = $('.hide_description').val();
+		console.log(hide_description);
+
+		$("#display").modal('hide');
+		setTimeout(function(){
+		location.reload(); 
+		}, 1000);
+
+		$.ajax({
+		dataType: 'text',
+		type: 'POST',
+		url: url + 'admin/unhide_profile',
+		data: {
+		user_id: user_id,
+		emp_id: emp_id,
+		hide_description:hide_description
+		},
+
+		success: function(result3) {
+
+		},
+		})
+		});				
+		}
+		</script>
+
+	<script type="text/javascript">
+	function unblockprofile(){
+	var url = '<?php echo base_url() ?>'
+	var id = $('#user_id').val();
+	var emp_id= $('#session').val();
+	var phone=$('#phone').val();
+//	console.log(phone);
+	$("#btnunblk_" + id).click(function(){
+	var block_description= $('.block_description').val();
+	var block_status=$('.block_status').val();
+	//console.log(block_status);
+	//console.log(block_description);
+	$("#unblock_").modal('hide');
+	setTimeout(function(){
+	location.reload(); 
+	}, 1000);
+	$.ajax({
+	dataType: 'json',
+	type: 'POST',
+	url: url + 'admin/unblock_profile',
+	data: {
+	id: id,
+	emp_id: emp_id,
+	phone:phone,
+	block_description:block_description,
+	block_status:block_status
+	},
+
+	success: function(result5) {
+
+	},
+	})
+	});
+	}
+	</script>
+
+	<script type="text/javascript">
+	function blockprofile(){
+	var url = '<?php echo base_url() ?>'
+	var id = $('#user_id').val();
+	var emp_id= $('#session').val();
+	var phone=$('#phone').val();
+
+	$('#btnblk_' + id).click(function()
+	{
+	var block_description=$('#block_description').val();
+	var block_status=$('#block_status').val();
+	$("#block_").modal('hide');
+	setTimeout(function(){
+	location.reload(); 
+	}, 1000);
+	$.ajax({
+	dataType: 'json',
+	type: 'POST',
+	url: url + 'admin/block_profile',
+	data: {
+	id: id,
+	emp_id: emp_id,
+	phone:phone,
+	block_description:block_description,
+	block_status:block_status
+	},
+
+	success: function(result4) 
+	{
+
+	},
+	})
+	});
+	}
+	</script>
+	
+	<script type="text/javascript">
+	function change_pass(){
+	var url = '<?php echo base_url() ?>'  
+	var id = $('#user_id').val();
+	console.log(id);
+	var emp_id= $('#session').val();
+	$('#changepassbtn_' + id).click(function() {
+
+	var password = $('#password').val();
+	console.log(password);
+	$('#changepassword').modal('hide');
+	$.ajax({
+	dataType: 'json',
+	type: 'POST',
+	url: url + 'admin/changepassword',
+	data: {
+	id: id,
+	emp_id: emp_id,
+	password:password
+	},
+
+	success: function(result6) 
+	{
+
+	},
+
+	});
+	});
+	}
+	
+	
+	
+	
+	
+	
+    /*function interest_details(){
+    var url = '<?php echo base_url() ?>'  
+    var receiver_id = $('#receiver_id').val();
+    console.log(receiver_id);
+    
+    
+    }*/
+    //$(document).ready(function() {
+    /*$(document).on('load','.interestdetails',function(){
+    interest_details();
+    });
+    */
+    // });
+    
+    </script>
+   
+   </html>
