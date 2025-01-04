@@ -65,8 +65,9 @@ class Happyadminservicemodel extends CI_Model
         ini_set('display_errors', '1');
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
+        $mode = $_GET['mode'];
         // print_r($data);
-        if ($data['mode'] == 0) {
+        if ($mode == 0) {
             // get today task -> Lead Assign Self
             $this->db->select("tl.id id,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
             $this->db->from("tbl_lead tl");
@@ -97,7 +98,7 @@ class Happyadminservicemodel extends CI_Model
             }
 
             return json_encode($result);
-        } else if ($data['mode']  == 1) {
+        } else if ($mode  == 1) {
             // update lead Call status
             $updatearr = array();
             $updatearr['user_name'] = $data['user_name'];
