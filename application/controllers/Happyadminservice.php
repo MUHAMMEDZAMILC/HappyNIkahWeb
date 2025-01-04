@@ -68,4 +68,9 @@ class HappyAdminservice extends CI_Controller {
 	    $this->load->model("Happyadminservicemodel");
 	    echo  $this->Happyadminservicemodel->Lead();
 	}
+	// Payment Module
+	public function PaymentModule(){
+	    $this->load->model("Happyadminservicemodel");
+	    echo  $this->Happyadminservicemodel->Payment();
+	}
 }

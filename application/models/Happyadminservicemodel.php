@@ -119,7 +119,7 @@ class Happyadminservicemodel extends CI_Model
             return json_encode($result);
         }else if($mode==2){
              // get today task -> Approve Calls
-             $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,r.reg_date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+             $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
              $this->db->from("tbl_assign_approve_calls tap");
              $this->db->join("tbl_registration r", "r.id=tap.action_check");
              $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
@@ -138,6 +138,101 @@ class Happyadminservicemodel extends CI_Model
              }
  
              return json_encode($json);
+        }else if($mode == 3){
+            // get today task -> Active Calls
+            $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,taa.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+            $this->db->from("tbl_assign_active_calls taa");
+            $this->db->join("tbl_registration r", "r.id=taa.action_check");
+            $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+            $this->db->where("taa.assign_id", $data['emp_id']);
+            $this->db->where("taa.active_status","active");
+            $this->db->where("taa.goto_status",0);
+            $query = $this->db->get();
+           $json = array();
+            if ($query->num_rows() > 0) {
+                $json["data"] = $query->result_array();
+                $json["error"] = false;
+                $json["msg"] = "Get Data";
+            } else {
+                $json["error"] = true;
+                $json["msg"] = "Data Not Found";
+            }
+
+            return json_encode($json);
+        }
+    }
+
+    public function Payment() {
+        error_reporting(0);
+        ini_set('display_errors', '1');
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        $mode = $_GET['mode'];
+
+        if ($mode == 0) {
+            
+        }else if ($mode ==1) {
+             // post pond payment 
+             $currentDate = new DateTime();
+            $updatearr = array();
+            $updatearr['plan_id'] = $data['plan_id'];
+            $updatearr['plan_type'] = $data['plan_type'];
+            $updatearr['postpone_date'] = $data['postpone_date'];
+            $updatearr['cdate'] = date("Y-m-d H:i:s");
+            $updatearr['message'] = $data['message'];
+            $updatearr['login_id'] = $data['emp_id'];
+            $updatearr['payment_id'] = $data['payment_id'];//reg id 
+            $updatearr['reason'] = $data['reason'];
+            $updatearr['delete_status'] = $data['dstatus'];
+            $updatearr['paid_status'] = $data['pstatus'];
+            $updatearr['crnt_date'] = date("Y-m-d");
+            if (isset($data['paymentreq_id']) && $data['paymentreq_id'] != '') {
+                $this->db->select("*");
+                $this->db->from("tbl_paymentrequest");
+                $this->db->where("id", $data['paymentreq_id']);
+                $query = $this->db->get();
+                $result = array();
+                if ($query->num_rows() > 0) {
+                    $this->db->where("id", $data['paymentreq_id']);
+                    $this->db->update("tbl_paymentrequest", $updatearr);
+                    if ($this->db->affected_rows() > 0) {
+
+                        $result['error'] = false;
+                        $result['msg'] = 'Payment Postpond updated successfully';
+                    } else {
+
+                        $result['error'] = true;
+                        $result['msg'] = 'Failed to update Payment Postpond';
+                    }
+                } else {
+                    $res = $this->db->insert("tbl_paymentrequest", $updatearr);
+                    if ($res) {
+
+                        $result['error'] = false;
+                        $result['msg'] = 'Payment Postpond Upload successfully';
+                        
+                    }else{
+
+                        $result['error'] = true;
+                        $result['msg'] = 'Failed to Upload Payment Postpond';
+                        
+                    }
+                }
+            } else {
+                
+                $res = $this->db->insert("tbl_paymentrequest", $updatearr);
+                if ($res) {
+                    $result['error'] = false;
+                    $result['msg'] = 'Payment Postpond Upload successfully';
+                    
+                }else{
+                    $result['error'] = true;
+                    $result['msg'] = 'Failed to Upload Payment Postpond';
+                    
+                }
+            }
+            return json_encode($result);
+           
         }
     }
     public function AdsManage()
