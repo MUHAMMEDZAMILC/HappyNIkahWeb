@@ -26,7 +26,7 @@ class Happyadminservicemodel extends CI_Model
         $this->db->select("user_id empid,usertype_id");
         $this->db->from("tbl_employees1");
         $this->db->where("username", $data['username']);
-        $this->db->where("password", $data['password']);
+        $this->db->where("password",md5($data['password']) );
         // $this->db->where("usertype_id", $data['usertype']);
         // $this->db->where("deleted", 0);
         $query = $this->db->get();
