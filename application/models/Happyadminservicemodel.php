@@ -27,8 +27,6 @@ class Happyadminservicemodel extends CI_Model
         $this->db->from("tbl_employees1");
         $this->db->where("username", $data['username']);
         $this->db->where("password",md5($data['password']) );
-        // $this->db->where("usertype_id", $data['usertype']);
-        // $this->db->where("deleted", 0);
         $query = $this->db->get();
         $json = array();
         if ($query->num_rows() > 0) {
@@ -72,7 +70,7 @@ class Happyadminservicemodel extends CI_Model
             $this->db->select("tl.id id,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
             $this->db->from("tbl_lead tl");
             $this->db->where("tl.staff_id", $data['emp_id']);
-            // $this->db->where("tl.status","active");
+            $this->db->where("tl.status","active");
             $query1 = $this->db->get();
             $query1arr = array();
             $query1arr = $query1->result_array();
@@ -86,14 +84,14 @@ class Happyadminservicemodel extends CI_Model
             $query2 = $this->db->get();
             $query2arr = array();
             $query2arr = $query2->result_array();
-            $result = array_merge($query1arr, $query2arr);
-            if (empty($result)) {
-                $result[0]['error'] = true;
-                $result[0]['msg'] = 'Data Not Found';
+            $result['data'] = array_merge($query1arr, $query2arr);
+            if (empty($result['data'])) {
+                $result['error'] = true;
+                $result['msg'] = 'Data Not Found';
             } else {
 
-                $result[0]['error'] = false;
-                $result[0]['msg'] = 'Get Data';
+                $result['error'] = false;
+                $result['msg'] = 'Get Data';
 
             }
 
@@ -119,6 +117,27 @@ class Happyadminservicemodel extends CI_Model
                 $result = array('error' => true, 'msg' => 'Failed to update lead');
             }
             return json_encode($result);
+        }else if($mode==2){
+             // get today task -> Approve Calls
+             $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,r.reg_date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+             $this->db->from("tbl_assign_approve_calls tap");
+             $this->db->join("tbl_registration r", "r.id=tap.action_check");
+             $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+             $this->db->where("tap.assign_id", $data['emp_id']);
+             $this->db->where("tap.active_status","active");
+             $this->db->where("tap.goto_status",0);
+             $query = $this->db->get();
+            $json = array();
+             if ($query->num_rows() > 0) {
+                 $json["data"] = $query->result_array();
+                 $json["error"] = false;
+                 $json["msg"] = "Get Data";
+             } else {
+                 $json["error"] = true;
+                 $json["msg"] = "Data Not Found";
+             }
+ 
+             return json_encode($json);
         }
     }
     public function AdsManage()
