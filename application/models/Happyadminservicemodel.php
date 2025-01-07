@@ -19,43 +19,63 @@ class Happyadminservicemodel extends CI_Model
 
     public function LoginStaff()
     {
-        error_reporting(0);
-        ini_set('display_errors', '1');
-        $json = file_get_contents(filename: 'php://input');
-        $data = json_decode($json, true);
-        $this->db->select("user_id empid,usertype_id");
-        $this->db->from("tbl_employees1");
-        $this->db->where("username", $data['username']);
-        $this->db->where("password",md5($data['password']) );
-        $query = $this->db->get();
-        $json = array();
-        if ($query->num_rows() > 0) {
-            $json = $query->row_array();
-            if ($json['deleted'] == 1) {
-                $json["empid"] = 0;
-                $json["usertype_id"] = 0;
-                $json["error"] = true;
-                $json["msg"] = "Your Account is Deleted";
-            } else if ($json['usertype_id'] != $data['usertype']) {
-                $json["empid"] = 0;
-                $json["usertype_id"] = 0;
-                $json["error"] = true;
-                $json["msg"] = "You are not authorized to login";
-            } else {
-                $json['empid'] = (int) $json['empid']; // Cast to integer
-                $json['usertype_id'] = (int) $json['usertype_id']; // Cast to integer
-                $json["error"] = false;
-                $json["msg"] = "Successfully Login";
+        // Proper error handling should be used instead of suppressing errors.
+        try {
+            $json = file_get_contents('php://input');
+            if ($json === false) {
+                throw new Exception("Failed to get input");
             }
-
-        } else {
-            $json["empid"] = 0;
-            $json["usertype_id"] = 0;
-            $json["error"] = true;
-            $json["msg"] = "Invalid Username or Password";
+            
+            $data = json_decode($json, true);
+            if (!isset($data['username'], $data['password'], $data['usertype'])) {
+                throw new Exception("Invalid input data");
+            }
+    
+            // Use prepared statements and parameterized queries to prevent SQL injection
+            $this->db->select("user_id AS empid, usertype_id, deleted");
+            $this->db->from("tbl_employees1");
+            $this->db->where("username", $data['username']);
+            $this->db->where("password", md5($data['password'])); // Replace this with password_hash in your DB
+            $query = $this->db->get();
+            $json = array();
+    
+            if ($query->num_rows() > 0) {
+                $json = $query->row_array();
+                if ($json['deleted'] == 1) {
+                    $json["empid"] = 0;
+                    $json["usertype_id"] = 0;
+                    $json["error"] = true;
+                    $json["msg"] = "Your Account is Deleted";
+                } else if ((int)$json['usertype_id'] !== (int)$data['usertype']) {
+                    $json["empid"] = 0;
+                    $json["usertype_id"] = 0;
+                    $json["error"] = true;
+                    $json["msg"] = "You are not authorized to login";
+                } else {
+                    $json['empid'] = (int)$json['empid'];
+                    $json['usertype_id'] = (int)$json['usertype_id'];
+                    $json["error"] = false;
+                    $json["msg"] = "Successfully Login";
+                }
+            } else {
+                $json["empid"] = 0;
+                $json["usertype_id"] = 0;
+                $json["error"] = true;
+                $json["msg"] = "Invalid Username or Password";
+            }
+    
+            return json_encode($json);
+    
+        } catch (Exception $e) {
+            return json_encode([
+                "empid" => 0,
+                "usertype_id" => 0,
+                "error" => true,
+                "msg" => $e->getMessage()
+            ]);
         }
-        return json_encode($json);
     }
+    
 
     public function Lead()
     {
@@ -88,10 +108,13 @@ class Happyadminservicemodel extends CI_Model
             if (empty($result['data'])) {
                 $result['error'] = true;
                 $result['msg'] = 'Data Not Found';
+                $result['fun'] = 'Enter Message';
+
             } else {
 
                 $result['error'] = false;
                 $result['msg'] = 'Get Data';
+                $result['fun'] = 'Enter Message';
 
             }
 
@@ -132,9 +155,11 @@ class Happyadminservicemodel extends CI_Model
                  $json["data"] = $query->result_array();
                  $json["error"] = false;
                  $json["msg"] = "Get Data";
+                 $json['fun'] = 'Postpond Payment';
              } else {
                  $json["error"] = true;
                  $json["msg"] = "Data Not Found";
+                 $json['fun'] = 'Postpond Payment';
              }
  
              return json_encode($json);
@@ -153,9 +178,11 @@ class Happyadminservicemodel extends CI_Model
                 $json["data"] = $query->result_array();
                 $json["error"] = false;
                 $json["msg"] = "Get Data";
+                $json['fun'] = 'Postpond Payment';
             } else {
                 $json["error"] = true;
                 $json["msg"] = "Data Not Found";
+                $json['fun'] = 'Postpond Payment';
             }
 
             return json_encode($json);
