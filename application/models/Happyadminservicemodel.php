@@ -25,35 +25,37 @@ class Happyadminservicemodel extends CI_Model
             if ($json === false) {
                 throw new Exception("Failed to get input");
             }
-            
+
             $data = json_decode($json, true);
             if (!isset($data['username'], $data['password'], $data['usertype'])) {
                 throw new Exception("Invalid input data");
             }
-    
+
             // Use prepared statements and parameterized queries to prevent SQL injection
             $this->db->select("user_id AS empid, usertype_id, deleted");
             $this->db->from("tbl_employees1");
             $this->db->where("username", $data['username']);
             $this->db->where("password", md5($data['password'])); // Replace this with password_hash in your DB
             $query = $this->db->get();
+            // echo $this->db->last_query();
+            // print_r( $query->row_array());
             $json = array();
-    
+
             if ($query->num_rows() > 0) {
                 $json = $query->row_array();
                 if ($json['deleted'] == 1) {
                     $json["empid"] = 0;
                     $json["usertype_id"] = 0;
                     $json["error"] = true;
-                    $json["msg"] = "Your Account is Deleted";
-                } else if ((int)$json['usertype_id'] !== (int)$data['usertype']) {
+                    $json["msg"] = "Your Account was Deleted";
+                } else if ((int) $json['usertype_id'] !== (int) $data['usertype']) {
                     $json["empid"] = 0;
                     $json["usertype_id"] = 0;
                     $json["error"] = true;
                     $json["msg"] = "You are not authorized to login";
                 } else {
-                    $json['empid'] = (int)$json['empid'];
-                    $json['usertype_id'] = (int)$json['usertype_id'];
+                    $json['empid'] = (int) $json['empid'];
+                    $json['usertype_id'] = (int) $json['usertype_id'];
                     $json["error"] = false;
                     $json["msg"] = "Successfully Login";
                 }
@@ -61,11 +63,11 @@ class Happyadminservicemodel extends CI_Model
                 $json["empid"] = 0;
                 $json["usertype_id"] = 0;
                 $json["error"] = true;
-                $json["msg"] = "Invalid Username or Password";
+                $json["msg"] = "Invalid Username Or Password";
             }
-    
+
             return json_encode($json);
-    
+
         } catch (Exception $e) {
             return json_encode([
                 "empid" => 0,
@@ -75,7 +77,100 @@ class Happyadminservicemodel extends CI_Model
             ]);
         }
     }
-    
+    public function DashDetail()
+    {
+        // Proper error handling should be used instead of suppressing errors.
+        try {
+            $json = file_get_contents('php://input');
+            if ($json === false) {
+                throw new Exception("Failed to get input");
+            }
+
+            $data = json_decode($json, true);
+            if (!isset($data['empid'])) {
+                throw new Exception("Invalid input data");
+            }
+
+            // get target
+            $this->db->select("sum(ifnull(tt.target_amount,0)) AS targetamt");
+            $this->db->from("tbl_target tt");
+            $this->db->where("tt.user_id", $data['empid']);
+            $query = $this->db->get();
+            $json1 = array();
+            $json1 = $query->row_array();
+
+            // total achievement
+            $this->db->select("ifnull(sum(tp.final_amount),0) AS achieveamt");
+            $this->db->from("tbl_payement tp");
+            $this->db->join("tbl_registration r", "r.id=tp.user_id");
+            $this->db->where("tp.status", 1);
+            $this->db->where("tp.payment_staff_id", $data['empid']);
+            $this->db->where("tp.payment_status", 'Paid');
+            $this->db->where("MONTH(tp.date)", date('m'));  // Filter by current month
+            $this->db->where("YEAR(tp.date)", date('Y'));
+
+            $query2 = $this->db->get();
+            $json2 = array();
+            $json2 = $query2->row_array();
+
+            // BALANCE AMOUNT
+            $balaceamt = $json1['targetamt'] - $json2['achieveamt'];
+
+            // DAYS LEFT
+            $today = new DateTime();
+            $endOfMonth = new DateTime('last day of this month');
+            $interval = $today->diff($endOfMonth);
+            $daysLeft = $interval->days;
+
+
+            // TODAY TOTAL CREATION
+            $this->db->select("COUNT(*) AS todaycreation");
+            $this->db->from("tbl_registration r");
+            $this->db->where("r.staff_id", $data['empid']);
+            $this->db->where("r.status!=",3 );
+            $this->db->where("DAY(r.reg_date)", date('d'));
+            $query3 = $this->db->get();
+            $json3 = array();
+            $json3 = $query3->row_array();
+
+            // MONTH TOTAL CREATION
+            $this->db->select("COUNT(*) AS monthcreation");
+            $this->db->from("tbl_registration r");
+            $this->db->where("r.staff_id", $data['empid']);
+            $this->db->where("r.status!=",3 );
+            $this->db->where("MONTH(r.reg_date)", date('d'));
+            $query4 = $this->db->get();
+            $json4 = array();
+            $json4 = $query4->row_array();
+            // echo $this->db->last_query();
+            $return = array();
+            $return = [
+                "targetamt"=>$json1['targetamt'],
+                "achieveamt"=>$json2['achieveamt'],
+                "balanceamt"=>$balaceamt,
+                "dayleft"=>$daysLeft,
+                "todaycreation"=>$json3['todaycreation'],
+                "monthcreation"=>$json4['monthcreation'],
+                "error"=>false,
+                "msg"=>"Get Data",
+            ];
+
+            return json_encode($return);
+
+        } catch (Exception $e) {
+            return json_encode([
+                "targetamt"=>0,
+                "achieveamt"=>0,
+                "balanceamt"=>0,
+                "dayleft"=>0,
+                "todaycreation"=>0,
+                "monthcreation"=>0,
+                "error"=>true,
+                "msg"=>"Server Down",
+            ]);
+        }
+    }
+
 
     public function Lead()
     {
@@ -90,7 +185,7 @@ class Happyadminservicemodel extends CI_Model
             $this->db->select("tl.id id,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
             $this->db->from("tbl_lead tl");
             $this->db->where("tl.staff_id", $data['emp_id']);
-            $this->db->where("tl.status","active");
+            $this->db->where("tl.status", "active");
             $query1 = $this->db->get();
             $query1arr = array();
             $query1arr = $query1->result_array();
@@ -119,15 +214,15 @@ class Happyadminservicemodel extends CI_Model
             }
 
             return json_encode($result);
-        } else if ($mode  == 1) {
+        } else if ($mode == 1) {
             // update lead Call status
             $updatearr = array();
             $updatearr['user_name'] = $data['user_name'];
             $updatearr['user_email'] = $data['user_email'];
-            $updatearr['status'] ="inactive";
-            $updatearr['call_type'] =$data['call_type'];
-            $updatearr['user_gender'] =$data['user_gender'];
-            $updatearr['message'] =$data['message'];
+            $updatearr['status'] = "inactive";
+            $updatearr['call_type'] = $data['call_type'];
+            $updatearr['user_gender'] = $data['user_gender'];
+            $updatearr['message'] = $data['message'];
             $updatearr['lead_status'] = $data['lead_status'];
             $updatearr['updated_on'] = $data['updated_on'];
             $updatearr['update_id'] = $data['update_id'];
@@ -140,40 +235,40 @@ class Happyadminservicemodel extends CI_Model
                 $result = array('error' => true, 'msg' => 'Failed to update lead');
             }
             return json_encode($result);
-        }else if($mode==2){
-             // get today task -> Approve Calls
-             $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
-             $this->db->from("tbl_assign_approve_calls tap");
-             $this->db->join("tbl_registration r", "r.id=tap.action_check");
-             $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
-             $this->db->where("tap.assign_id", $data['emp_id']);
-             $this->db->where("tap.active_status","active");
-             $this->db->where("tap.goto_status",0);
-             $query = $this->db->get();
+        } else if ($mode == 2) {
+            // get today task -> Approve Calls
+            $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+            $this->db->from("tbl_assign_approve_calls tap");
+            $this->db->join("tbl_registration r", "r.id=tap.action_check");
+            $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+            $this->db->where("tap.assign_id", $data['emp_id']);
+            $this->db->where("tap.active_status", "active");
+            $this->db->where("tap.goto_status", 0);
+            $query = $this->db->get();
             $json = array();
-             if ($query->num_rows() > 0) {
-                 $json["data"] = $query->result_array();
-                 $json["error"] = false;
-                 $json["msg"] = "Get Data";
-                 $json['fun'] = 'Postpond Payment';
-             } else {
-                 $json["error"] = true;
-                 $json["msg"] = "Data Not Found";
-                 $json['fun'] = 'Postpond Payment';
-             }
- 
-             return json_encode($json);
-        }else if($mode == 3){
+            if ($query->num_rows() > 0) {
+                $json["data"] = $query->result_array();
+                $json["error"] = false;
+                $json["msg"] = "Get Data";
+                $json['fun'] = 'Postpond Payment';
+            } else {
+                $json["error"] = true;
+                $json["msg"] = "Data Not Found";
+                $json['fun'] = 'Postpond Payment';
+            }
+
+            return json_encode($json);
+        } else if ($mode == 3) {
             // get today task -> Active Calls
             $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,taa.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
             $this->db->from("tbl_assign_active_calls taa");
             $this->db->join("tbl_registration r", "r.id=taa.action_check");
             $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
             $this->db->where("taa.assign_id", $data['emp_id']);
-            $this->db->where("taa.active_status","active");
-            $this->db->where("taa.goto_status",0);
+            $this->db->where("taa.active_status", "active");
+            $this->db->where("taa.goto_status", 0);
             $query = $this->db->get();
-           $json = array();
+            $json = array();
             if ($query->num_rows() > 0) {
                 $json["data"] = $query->result_array();
                 $json["error"] = false;
@@ -189,7 +284,8 @@ class Happyadminservicemodel extends CI_Model
         }
     }
 
-    public function Payment() {
+    public function Payment()
+    {
         error_reporting(0);
         ini_set('display_errors', '1');
         $json = file_get_contents('php://input');
@@ -197,10 +293,10 @@ class Happyadminservicemodel extends CI_Model
         $mode = $_GET['mode'];
 
         if ($mode == 0) {
-            
-        }else if ($mode ==1) {
-             // post pond payment 
-             $currentDate = new DateTime();
+
+        } else if ($mode == 1) {
+            // post pond payment 
+            $currentDate = new DateTime();
             $updatearr = array();
             $updatearr['plan_id'] = $data['plan_id'];
             $updatearr['plan_type'] = $data['plan_type'];
@@ -237,29 +333,29 @@ class Happyadminservicemodel extends CI_Model
 
                         $result['error'] = false;
                         $result['msg'] = 'Payment Postpond Upload successfully';
-                        
-                    }else{
+
+                    } else {
 
                         $result['error'] = true;
                         $result['msg'] = 'Failed to Upload Payment Postpond';
-                        
+
                     }
                 }
             } else {
-                
+
                 $res = $this->db->insert("tbl_paymentrequest", $updatearr);
                 if ($res) {
                     $result['error'] = false;
                     $result['msg'] = 'Payment Postpond Upload successfully';
-                    
-                }else{
+
+                } else {
                     $result['error'] = true;
                     $result['msg'] = 'Failed to Upload Payment Postpond';
-                    
+
                 }
             }
             return json_encode($result);
-           
+
         }
     }
     public function AdsManage()
@@ -854,7 +950,7 @@ class Happyadminservicemodel extends CI_Model
                 array("id" => "6", "value" => "Free Activation")
             ];
             return json_encode($json);
-        }else if ($mode == 31) {
+        } else if ($mode == 31) {
             $json = array();
             $json["error"] = false;
             $json["msg"] = "";
