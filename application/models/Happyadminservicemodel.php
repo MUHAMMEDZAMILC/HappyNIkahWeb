@@ -244,7 +244,7 @@ class Happyadminservicemodel extends CI_Model
         if ($mode == 0) {
             // get today task -> Lead Assign Self
             try {
-                $this->db->select("tl.id id,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
+                $this->db->select("tl.id lid,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
                 $this->db->from("tbl_lead tl");
                 $this->db->where("tl.staff_id", $data['emp_id']);
                 $this->db->where("tl.status", "active");
@@ -263,6 +263,7 @@ class Happyadminservicemodel extends CI_Model
                 $query2arr = $query2->result_array();
                 $result['data'] = array_merge($query1arr, $query2arr);
                 if (empty($result['data'])) {
+                    $result["data"] =[];
                     $result['error'] = false;
                     $result['msg'] = 'Data Not Found';
                     $result['fun'] = 'Enter Message';
@@ -278,6 +279,7 @@ class Happyadminservicemodel extends CI_Model
                 return json_encode($result);
             } catch (Exception $e) {
                 return json_encode([
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => "Enter Message",
@@ -331,6 +333,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["msg"] = "Get Data";
                     $json['fun'] = 'Postpond Payment';
                 } else {
+                    $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
                     $json['fun'] = 'Postpond Payment';
@@ -339,6 +342,7 @@ class Happyadminservicemodel extends CI_Model
                 return json_encode($json);
             } catch (Exception $e) {
                 return json_encode([
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => 'Postpond Payment'
@@ -363,6 +367,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["msg"] = "Get Data";
                     $json['fun'] = 'Postpond Payment';
                 } else {
+                    $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
                     $json['fun'] = 'Postpond Payment';
@@ -371,12 +376,20 @@ class Happyadminservicemodel extends CI_Model
                 return json_encode($json);
             } catch (Exception $e) {
                 return json_encode([
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => 'Postpond Payment'
                 ]);
             }
 
+        }else{
+            return json_encode([
+                "data"=>[],
+                "error" => true,
+                "msg" => "Server Down",
+                "fun" => 'Postpond Payment'
+            ]);
         }
     }
 
