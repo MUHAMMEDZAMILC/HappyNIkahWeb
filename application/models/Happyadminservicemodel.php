@@ -172,6 +172,66 @@ class Happyadminservicemodel extends CI_Model
         }
     }
 
+    public function TabBar()
+    {
+        error_reporting(0);
+        ini_set('display_errors', '1');
+        $mode = $_GET['mode'];
+        $head = isset($_GET['head']) ? $_GET['head'] : -1;
+
+        if ($mode == 0) {
+            // crm tabbar
+            try {
+                $json = array();
+                $json['error'] = false;
+                $json['msg'] = "Get Data";
+
+                if($mode == 0 && $head == 1){
+                    $json['data'] = [
+                        array("id" => 0, "value" => "Lead Calls"),
+                        array("id" => 2, "value" => "Approve Calls"),
+                        array("id" => 3, "value" => "Acticve Calls"),
+                        array("id" => 4, "value" => "Direct Register"),
+                        array("id" => 5, "value" => "Chat Support"),
+                        array("id" => 6, "value" => "Followup Calls"),
+                        array("id" => 7, "value" => "Postpond"),
+                    ]; 
+                } else if($mode == 0 && $head == 2){
+                    $json['data'] = [
+                        array("id" => 1, "value" => "New Leads"),
+                        array("id" => 2, "value" => "Pending Leads"),
+                        array("id" => 3, "value" => "Dead Leads"),
+                        array("id" => 4, "value" => "Converted Leads"),
+                       
+                    ]; 
+                } else if($mode == 0 && $head == 3){
+                    $json['data'] = [
+                        array("id" => 1, "value" => "Approve Calls"),
+                        array("id" => 2, "value" => "Active Calls"),
+                        array("id" => 3, "value" => "Direct Register"),
+                        array("id" => 4, "value" => "Chat Support"),
+                        array("id" => 5, "value" => "Pending FollowUp Calls"),
+                       
+                    ]; 
+                }else{
+                    $json['data'] = [
+                        array("id" => 1, "value" => "Today Tasks"),
+                        array("id" => 2, "value" => "Lead Calls"),
+                        array("id" => 3, "value" => "Sales Calls"),
+                    ];
+                }
+                
+            } catch (Exception $e) {
+                $json = array();
+                $json['error'] = true;
+                $json['msg'] = "Server Down";
+            }
+
+
+            return json_encode($json);
+        }
+    }
+
 
     public function Lead()
     {

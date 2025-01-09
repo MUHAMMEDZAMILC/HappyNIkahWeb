@@ -38,6 +38,11 @@ class HappyAdminservice extends CI_Controller {
 		$this->load->model("Happyadminservicemodel");
 	    echo  $this->Happyadminservicemodel->DashDetail();
 	}
+	public function TabBarModule() {
+		$this->load->model("Happyadminservicemodel");
+	    echo  $this->Happyadminservicemodel->TabBar();
+	}
+
 	public function AdsManagement(){
 	    
 	    $this->load->model("Happyadminservicemodel");
