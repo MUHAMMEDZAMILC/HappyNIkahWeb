@@ -375,7 +375,6 @@ class Happyadminservicemodel extends CI_Model
 
                 return json_encode($json);
             } catch (Exception $e) {
-               
                 return json_encode([
                     "data"=>[],
                     "error" => true,
@@ -453,7 +452,6 @@ class Happyadminservicemodel extends CI_Model
                 ]);
             }
         }else{
-            
             return json_encode([
                 "data"=>[],
                 "error" => true,
@@ -598,7 +596,7 @@ class Happyadminservicemodel extends CI_Model
             $this->db->from("tbl_help_support ths");
             $query = $this->db->get();
             $json = $query->row_array();
-            if ($json[color] == 1) {
+            if ($json['color'] == 1) {
                 $ardata['btn_color'] = 0;
                 $res = $this->db->update("tbl_help_support", $ardata);
             } else {
