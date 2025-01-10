@@ -92,7 +92,7 @@ class Happyadminservicemodel extends CI_Model
             }
 
             // get target
-            $this->db->select("sum(ifnull(tt.target_amount,0)) AS targetamt");
+            $this->db->select("ifnull(sum(ifnull(tt.target_amount,0)),0) AS targetamt");
             $this->db->from("tbl_target tt");
             $this->db->where("tt.user_id", $data['empid']);
             $query = $this->db->get();
@@ -200,8 +200,8 @@ class Happyadminservicemodel extends CI_Model
                     $json['data'] = [
                         array("id" => 1, "value" => "New Leads"),
                         array("id" => 2, "value" => "Pending Leads"),
-                        array("id" => 3, "value" => "Dead Leads"),
-                        array("id" => 4, "value" => "Converted Leads"),
+                        array("id" => 3, "value" => "Other Leads"),
+                        // array("id" => 4, "value" => "Converted Leads"),
                        
                     ]; 
                 } else if($mode == 0 && $head == 3){
@@ -600,490 +600,510 @@ class Happyadminservicemodel extends CI_Model
         $mode = $_GET['mode'];
         $head = $_GET['head'];
         // echo $mode;
-        if ($mode == 0) {
-            $this->db->select("ifnull(ths.adimage,'') condent,ifnull(ths.adstatus,'') status,ifnull(ths.btn_color,'') color");
-            $this->db->from("tbl_help_support ths");
-            $query = $this->db->get();
-            $json = $query->row_array();
-            return json_encode($json);
-        } else if ($mode == 1) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,name value");
-            $this->db->from("tbl_country");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
+        try {
+            if ($mode == 0) {
+                $this->db->select("ifnull(ths.adimage,'') condent,ifnull(ths.adstatus,'') status,ifnull(ths.btn_color,'') color");
+                $this->db->from("tbl_help_support ths");
+                $query = $this->db->get();
+                $json = $query->row_array();
+                return json_encode($json);
+            } else if ($mode == 1) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,name value");
+                $this->db->from("tbl_country");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } elseif ($mode == 2) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,name value");
+                $this->db->from("tbl_states");
+                if (!empty($_GET['head']) && $_GET['head'] != 'null') {
+                    $this->db->where("country_id", $_GET['head']);
+                }
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } elseif ($mode == 3) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("district_id id,district value");
+                $this->db->from("tbl_district");
+                if (!empty($_GET['head']) && $_GET['head'] != 'null') {
+                    $this->db->where("state_id", $_GET['head']);
+                }
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } elseif ($mode == 4) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,name value");
+                $this->db->from("tbl_city");
+                if (!empty($_GET['head']) && $_GET['head'] != 'null') {
+                    $this->db->where("district_id", $_GET['head']);
+                }
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 5) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,country value");
+                $this->db->from("tbl_countrycode");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 6) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,contacttype value");
+                $this->db->from("tbl_contacttype");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 7) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,maritalstatus value");
+                $this->db->from("tbl_maritalstatus");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 8) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("cid id,caste value");
+                $this->db->from("tbl_caste");
+                $this->db->where("rel_id", 2);
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 9) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = [
+                    ["id" => "0", "value" => "Normal"],
+                    ["id" => "1", "value" => "Physically Challenged"]
+    
+                ];
+    
+    
+                return json_encode($json);
+            } else if ($mode == 10) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,physicalstatus value");
+                $this->db->from("tbl_physicalstatus");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 11) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("mothertongue_id id,mothertongue value");
+                $this->db->from("tbl_mothertongue");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 12) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,high_education value");
+                $this->db->from("tbl_highest_education");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 13) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("edu_id id,education value");
+                $this->db->from("tbl_education");
+                if (!empty($_GET['head']) && $_GET['head'] != 'null') {
+                    $this->db->where("high_edu_id", $_GET["head"]);
+                }
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 14) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,professiontype value");
+                $this->db->from("tbl_professiontype");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 15) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("profession_id id,profession_name value");
+                $this->db->from("tbl_profession");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 16) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,madr_education value");
+                $this->db->from("tbl_madrassa_education");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 17) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("income_id id,income value");
+                $this->db->from("tbl_professional_income");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 18) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,familytype value");
+                $this->db->from("tbl_familytype");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 19) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,financialstatus value");
+                $this->db->from("tbl_financialstatus");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 20) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,hometype value");
+                $this->db->from("tbl_hometype");
+                $query = $this->db->get();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+                return json_encode($json);
+            } else if ($mode == 21) {
+                $json = array();
+                $json['error'] = false;
+                $json['msg'] = "";
+                $json['data'] = [array("id" => "1", "value" => "Alive"), array("id" => "2", "value" => "Died")];
+                return json_encode($json);
+            } else if ($mode == 22) {
+                $json = array();
+                $json['error'] = false;
+                $json['msg'] = "";
+                for ($i = 18; $i <= 70; $i++) {
+    
+                    $json['data'][] = array("id" => "$i", "value" => "$i");
+                }
+                return json_encode($json);
+            } else if ($mode == 23) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("height_id id,height value");
+                $this->db->from("tbl_height");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 24) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("weight_id id,weight value");
+                $this->db->from("tbl_weight");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 25) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,skincolor value");
+                $this->db->from("tbl_skincolor");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 26) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = [
+                    ["id" => "0", "value" => "Interest to Login"],
+                    ["id" => "1", "value" => "Others"]
+    
+                ];
+    
+                return json_encode($json);
+            } else if ($mode == 27) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("id,reason value");
+                $this->db->from("tbl_deletereason");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 28) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("plan_id id,plan_name pname,duration, plan_strick_amount pamt,contacts,messages,months days");
+                $this->db->from("tbl_plan");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 29) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json["data"] = array();
+                $this->db->select("user_id id, user_name value");
+                $this->db->where("user_type", 3);
+                $this->db->from("tbl_users1");
+                $query = $this->db->get();
+    
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                } else {
+                    $json["error"] = true;
+                    $json["msg"] = "Data Not Found";
+                }
+    
+                return json_encode($json);
+            } else if ($mode == 30) {
+                $json = array();
+                $json["error"] = false;
+                $json["msg"] = "";
+                $json['data'] = [
+                    array("id" => "0", "value" => "Office Payment"),
+                    array("id" => "1", "value" => "Back Deposit"),
+                    array("id" => "3", "value" => "Online Payment"),
+                    array("id" => "4", "value" => "Door Step"),
+                    array("id" => "5", "value" => "Money Exchange"),
+                    array("id" => "6", "value" => "Free Activation")
+                ];
+                return json_encode($json);
+            } else if ($mode == 31) {
+                try {
+                    $json = array();
+                    $json["error"] = false;
+                    $json["msg"] = "";
+                    $this->db->select("usertype_id id, user_type value");
+                    $this->db->where("status", 1);
+                    $this->db->or_where("status", 3);
+                    $this->db->from("tbl_usertype");
+                    $query = $this->db->get();
+        
+                    if ($query->num_rows() > 0) {
+                        $json["data"] = $query->result_array();
+                    } else {
+                        $json["error"] = true;
+                        $json["msg"] = "Data Not Found";
+                    }
+                    return json_encode($json);
+                } catch (Exception $th) {
+                    return json_encode([
+                        "data"=>[],
+                        "error"=>true,
+                        "msg"=>"Server Down"
+                    ]);
+                }
+                
+                
             }
-
-            return json_encode($json);
-        } elseif ($mode == 2) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,name value");
-            $this->db->from("tbl_states");
-            if (!empty($_GET['head']) && $_GET['head'] != 'null') {
-                $this->db->where("country_id", $_GET['head']);
-            }
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } elseif ($mode == 3) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("district_id id,district value");
-            $this->db->from("tbl_district");
-            if (!empty($_GET['head']) && $_GET['head'] != 'null') {
-                $this->db->where("state_id", $_GET['head']);
-            }
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } elseif ($mode == 4) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,name value");
-            $this->db->from("tbl_city");
-            if (!empty($_GET['head']) && $_GET['head'] != 'null') {
-                $this->db->where("district_id", $_GET['head']);
-            }
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 5) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,country value");
-            $this->db->from("tbl_countrycode");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 6) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,contacttype value");
-            $this->db->from("tbl_contacttype");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 7) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,maritalstatus value");
-            $this->db->from("tbl_maritalstatus");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 8) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("cid id,caste value");
-            $this->db->from("tbl_caste");
-            $this->db->where("rel_id", 2);
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 9) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = [
-                ["id" => "0", "value" => "Normal"],
-                ["id" => "1", "value" => "Physically Challenged"]
-
-            ];
-
-
-            return json_encode($json);
-        } else if ($mode == 10) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,physicalstatus value");
-            $this->db->from("tbl_physicalstatus");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 11) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("mothertongue_id id,mothertongue value");
-            $this->db->from("tbl_mothertongue");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 12) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,high_education value");
-            $this->db->from("tbl_highest_education");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 13) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("edu_id id,education value");
-            $this->db->from("tbl_education");
-            if (!empty($_GET['head']) && $_GET['head'] != 'null') {
-                $this->db->where("high_edu_id", $_GET["head"]);
-            }
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 14) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,professiontype value");
-            $this->db->from("tbl_professiontype");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 15) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("profession_id id,profession_name value");
-            $this->db->from("tbl_profession");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 16) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,madr_education value");
-            $this->db->from("tbl_madrassa_education");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 17) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("income_id id,income value");
-            $this->db->from("tbl_professional_income");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 18) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,familytype value");
-            $this->db->from("tbl_familytype");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 19) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,financialstatus value");
-            $this->db->from("tbl_financialstatus");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 20) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,hometype value");
-            $this->db->from("tbl_hometype");
-            $query = $this->db->get();
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
-        } else if ($mode == 21) {
-            $json = array();
-            $json['error'] = false;
-            $json['msg'] = "";
-            $json['data'] = [array("id" => "1", "value" => "Alive"), array("id" => "2", "value" => "Died")];
-            return json_encode($json);
-        } else if ($mode == 22) {
-            $json = array();
-            $json['error'] = false;
-            $json['msg'] = "";
-            for ($i = 18; $i <= 70; $i++) {
-
-                $json['data'][] = array("id" => "$i", "value" => "$i");
-            }
-            return json_encode($json);
-        } else if ($mode == 23) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("height_id id,height value");
-            $this->db->from("tbl_height");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 24) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("weight_id id,weight value");
-            $this->db->from("tbl_weight");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 25) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,skincolor value");
-            $this->db->from("tbl_skincolor");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 26) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = [
-                ["id" => "0", "value" => "Interest to Login"],
-                ["id" => "1", "value" => "Others"]
-
-            ];
-
-            return json_encode($json);
-        } else if ($mode == 27) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("id,reason value");
-            $this->db->from("tbl_deletereason");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 28) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("plan_id id,plan_name pname,duration, plan_strick_amount pamt,contacts,messages,months days");
-            $this->db->from("tbl_plan");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 29) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json["data"] = array();
-            $this->db->select("user_id id, user_name value");
-            $this->db->where("user_type", 3);
-            $this->db->from("tbl_users1");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-
-            return json_encode($json);
-        } else if ($mode == 30) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $json['data'] = [
-                array("id" => "0", "value" => "Office Payment"),
-                array("id" => "1", "value" => "Back Deposit"),
-                array("id" => "3", "value" => "Online Payment"),
-                array("id" => "4", "value" => "Door Step"),
-                array("id" => "5", "value" => "Money Exchange"),
-                array("id" => "6", "value" => "Free Activation")
-            ];
-            return json_encode($json);
-        } else if ($mode == 31) {
-            $json = array();
-            $json["error"] = false;
-            $json["msg"] = "";
-            $this->db->select("usertype_id id, user_type value");
-            $this->db->where("status", 1);
-            $this->db->from("tbl_usertype");
-            $query = $this->db->get();
-
-            if ($query->num_rows() > 0) {
-                $json["data"] = $query->result_array();
-            } else {
-                $json["error"] = true;
-                $json["msg"] = "Data Not Found";
-            }
-            return json_encode($json);
+        } catch (Exception $th) {
+            return json_encode([
+                "data"=>[],
+                "error"=>true,
+                "msg"=>"Server Down"
+            ]);
         }
+        
     }
 
     public function SendActivity()
