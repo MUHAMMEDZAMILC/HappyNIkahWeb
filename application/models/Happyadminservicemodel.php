@@ -375,6 +375,7 @@ class Happyadminservicemodel extends CI_Model
 
                 return json_encode($json);
             } catch (Exception $e) {
+               
                 return json_encode([
                     "data"=>[],
                     "error" => true,
@@ -383,7 +384,76 @@ class Happyadminservicemodel extends CI_Model
                 ]);
             }
 
+        }else if($mode ==4){
+            // get today task -> Direct Profiles
+            try {
+                $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->from("tbl_assign_approve_calls tap");
+                $this->db->join("tbl_registration r", "r.id=tap.action_check");
+                $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+                $this->db->where("tap.assign_id", $data['emp_id']);
+                $this->db->where("tap.active_status", "active");
+                $this->db->like("tap.goto_status", "quick%");
+                $query = $this->db->get();
+                $json = array();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                    $json["error"] = false;
+                    $json["msg"] = "Get Data";
+                    $json['fun'] = 'Postpond Payment';
+                } else {
+                    $json["data"] =[];
+                    $json["error"] = false;
+                    $json["msg"] = "Data Not Found";
+                    $json['fun'] = 'Postpond Payment';
+                }
+
+                return json_encode($json);
+            } catch (Exception $e) {
+                echo($e);
+                return json_encode([
+                    "data"=>[],
+                    "error" => true,
+                    "msg" => "Server Down",
+                    "fun" => 'Postpond Payment'
+                ]);
+            }
+        }else if($mode ==5){
+             // get today task -> Chat Support 
+            try {
+                $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->from("tbl_assign_approve_calls tap");
+                $this->db->join("tbl_registration r", "r.id=tap.action_check");
+                $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+                $this->db->where("tap.assign_id", $data['emp_id']);
+                $this->db->where("tap.active_status", "active");
+                $this->db->like("tap.goto_status", "chat%");
+                $query = $this->db->get();
+                $json = array();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                    $json["error"] = false;
+                    $json["msg"] = "Get Data";
+                    $json['fun'] = 'Postpond Payment';
+                } else {
+                    $json["data"] =[];
+                    $json["error"] = false;
+                    $json["msg"] = "Data Not Found";
+                    $json['fun'] = 'Postpond Payment';
+                }
+
+                return json_encode($json);
+            } catch (Exception $e) {
+                echo($e);
+                return json_encode([
+                    "data"=>[],
+                    "error" => true,
+                    "msg" => "Server Down",
+                    "fun" => 'Postpond Payment'
+                ]);
+            }
         }else{
+            
             return json_encode([
                 "data"=>[],
                 "error" => true,
