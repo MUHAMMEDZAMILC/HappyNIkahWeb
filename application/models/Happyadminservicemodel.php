@@ -198,7 +198,7 @@ class Happyadminservicemodel extends CI_Model
                     ]; 
                 } else if($mode == 0 && $head == 2){
                     $json['data'] = [
-                        array("id" => 1, "value" => "New Leads"),
+                        array("id" => 0, "value" => "New Leads"),
                         array("id" => 2, "value" => "Pending Leads"),
                         array("id" => 3, "value" => "Other Leads"),
                         // array("id" => 4, "value" => "Converted Leads"),
@@ -206,10 +206,10 @@ class Happyadminservicemodel extends CI_Model
                     ]; 
                 } else if($mode == 0 && $head == 3){
                     $json['data'] = [
-                        array("id" => 1, "value" => "Approve Calls"),
-                        array("id" => 2, "value" => "Active Calls"),
-                        array("id" => 3, "value" => "Direct Register"),
-                        array("id" => 4, "value" => "Chat Support"),
+                        array("id" => 2, "value" => "Approve Calls"),
+                        array("id" => 3, "value" => "Active Calls"),
+                        array("id" => 4, "value" => "Direct Register"),
+                        array("id" => 5, "value" => "Chat Support"),
                         array("id" => 5, "value" => "Pending FollowUp Calls"),
                        
                     ]; 
@@ -240,35 +240,44 @@ class Happyadminservicemodel extends CI_Model
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         $mode = $_GET['mode'];
-        $head = isset($_GET['head'])? $_GET['mode'] : "";
+        $head = isset($_GET['head'])? $_GET['head'] : "";
         // print_r($data);
         if ($mode == 0) {
             // get today task -> Lead Assign Self
             try {
-                $this->db->select("tl.id lid,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
+                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
                 $this->db->from("tbl_lead tl");
-                $this->db->where("tl.staff_id", $data['emp_id']);
+                $this->db->where("tl.staff_id",$data['empid']);
                 $this->db->where("tl.status", "active");
+                $this->db->where("tl.lead_id!=", "");
                 if($head==1){
-                    $this->db->where("DATE(tl.created_on) =", "CURDATE()", FALSE);
+                    $this->db->where("DATE(tl.created_on)", date('Y-m-d'));
                 }
                 
                 $query1 = $this->db->get();
                 $query1arr = array();
-                $query1arr = $query1->result_array();
+                $query1arr = array_map(function($item) {
+                    $item['lid'] = (int) $item['lid'];  // Convert lid to integer
+                    return $item;
+                }, $query1->result_array());
+
                 // get today task -> Lead Assign Other
-                $this->db->select("tl.id id,tl.lead_id leadid,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
+                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
                 $this->db->from("tbl_lead tl");
-                $this->db->join("tbl_assign_leads tal", "tal.action_check =tl.id");
-                $this->db->where("tal.assign_id", $data['emp_id']);
-                $this->db->where("tl.staff_id", $data['emp_id']);
+                $this->db->join("tbl_assign_leads tal", "tal.action_check=tl.id");
+                $this->db->where("tal.assign_id",$data['empid']);
+                $this->db->where("tl.staff_id", $data['empid']);
                 $this->db->where("tl.status", "active");
+                $this->db->where("tl.lead_id!=", "");
                 if($head==1){
-                    $this->db->where("DATE(tl.created_on) =", "CURDATE()", FALSE);
+                    $this->db->where("DATE(tal.date)", date('Y-m-d'));
                 }
                 $query2 = $this->db->get();
                 $query2arr = array();
-                $query2arr = $query2->result_array();
+                $query2arr = array_map(function($item) {
+                    $item['lid'] = (int) $item['lid'];  // Convert lid to integer
+                    return $item;
+                }, $query2->result_array());
                 $result['data'] = array_merge($query1arr, $query2arr);
                 if (empty($result['data'])) {
                     $result["data"] =[];
@@ -306,7 +315,7 @@ class Happyadminservicemodel extends CI_Model
                     $updatearr['user_gender'] = $data['user_gender'];
                     $updatearr['message'] = $data['message'];
                     $updatearr['lead_status'] = $data['lead_status'];
-                    $updatearr['updated_on'] = $data['updated_on'];
+                    $updatearr['updated_on'] = date('Y-m-d');
                     $updatearr['update_id'] = $data['update_id'];
                     $updatearr['happynikah_id'] = $data['happynikah_id'];
                     $this->db->where("id", $data['leadid']);
@@ -318,48 +327,55 @@ class Happyadminservicemodel extends CI_Model
                     }
                     return json_encode($result);
                 } else {
-                    $this->db->select("tl.*");
-                    $this->db->from("tbl_lead tl");
-                    $this->db->where("tl.user_phone", $data['user_phone']);
-                    $query = $this->db->get();
-                    if ($query->num_rows() > 0) {
-                        $result['error'] = true;
-                        $result['msg'] = 'Already Created with '.$data['user_phone'];
-                    } else {
-                        $this->db->select("r.*");
-                        $this->db->from("tbl_registration r");
-                        $this->db->where("r.phone", $data['user_phone']);
+                    if (isset($data['user_phone']) && $data['user_phone']!='') {
+                        $this->db->select("tl.*");
+                        $this->db->from("tbl_lead tl");
+                        $this->db->where("tl.user_phone", $data['user_phone']);
                         $query = $this->db->get();
                         if ($query->num_rows() > 0) {
-                            $rdata = $query->row_array();
-                            $result['error'] = true;
-                            $result['msg'] = 'Already Registered HN ID is '.$rdata['happynikah_id'];
+                        $result['error'] = true;
+                        $result['msg'] = 'Already Created with '.$data['user_phone'];
                         } else {
-                            $updatearr = array();
-                            $updatearr['user_name'] = $data['user_name'];
-                            $updatearr['user_email'] = $data['user_email'];
-                            $updatearr['user_phone'] = $data['user_phone'];
-                            $updatearr['age'] = $data['dob'];
-                            $updatearr['created_on'] = date("Y-m-d");
-                            $updatearr['status'] = "active";
-                            $updatearr['staff_id'] = $data['update_id'];
-                            $updatearr['call_type'] = 7;
-                            $updatearr['data_source'] = $data['data_source'];
-                            $updatearr['user_gender'] = $data['user_gender'];
-                            $updatearr['user_location'] = $data['user_location'];
-                            $updatearr['source_value'] = $data['source_value'];
-                            $res = $this->db->insert("tbl_lead", $updatearr);
-                            if ($res) {
-                                $result['error'] = false;
-                                $result['msg'] = 'Create Lead Upload successfully';
-
-                            } else {
+                            $this->db->select("r.*");
+                            $this->db->from("tbl_registration r");
+                            $this->db->where("r.phone", $data['user_phone']);
+                            $query = $this->db->get();
+                            if ($query->num_rows() > 0) {
+                                $rdata = $query->row_array();
                                 $result['error'] = true;
-                                $result['msg'] = 'Failed to Create  Lead';
+                                $result['msg'] = 'Already Registered HN ID is '.$rdata['happynikah_id'];
+                            } else {
+                                $updatearr = array();
+                                $updatearr['user_name'] = $data['user_name'];
+                                $updatearr['user_email'] = $data['user_email'];
+                                $updatearr['user_phone'] = $data['user_phone'];
+                                $updatearr['age'] = $data['dob'];
+                                $updatearr['created_on'] = date("Y-m-d");
+                                $updatearr['status'] = "active";
+                                $updatearr['staff_id'] = $data['empid'];
+                                $updatearr['call_type'] = 7;
+                                $updatearr['data_source'] = $data['data_source'];
+                                $updatearr['user_gender'] = $data['user_gender'];
+                                $updatearr['user_location'] = $data['user_location'];
+                                $updatearr['source_value'] = $data['source_value'];
+                                $res = $this->db->insert("tbl_lead", $updatearr);
+                                if ($res) {
+                                    $result['error'] = false;
+                                    $result['msg'] = 'Create Lead Upload successfully';
 
+                                } else {
+                                    $result['error'] = true;
+                                    $result['msg'] = 'Failed to Create Lead';
+
+                                }
                             }
                         }
+                    }else{
+                        $result['error'] = true;
+                        $result['msg'] = 'Failed to Create Lead';
                     }
+
+                    
 
 
                     return json_encode($result);
@@ -375,14 +391,14 @@ class Happyadminservicemodel extends CI_Model
         } else if ($mode == 2) {
             // get today task -> Approve Calls
             try {
-                $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
                 $this->db->from("tbl_assign_approve_calls tap");
                 $this->db->join("tbl_registration r", "r.id=tap.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
-                $this->db->where("tap.assign_id", $data['emp_id']);
+                $this->db->where("tap.assign_id", $data['empid']);
                 $this->db->where("tap.active_status", "active");
                 if($head==1){
-                    $this->db->where("DATE(tap.date) =", "CURDATE()", FALSE);
+                    $this->db->where("DATE(tap.date)", date('Y-m-d'), FALSE);
                 }
                 $this->db->where("tap.active_status", "active");
                 $this->db->where("tap.goto_status", 0);
@@ -413,13 +429,13 @@ class Happyadminservicemodel extends CI_Model
         } else if ($mode == 3) {
             // get today task -> Active Calls
             try {
-                $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,taa.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,taa.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
                 $this->db->from("tbl_assign_active_calls taa");
                 $this->db->join("tbl_registration r", "r.id=taa.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
-                $this->db->where("taa.assign_id", $data['emp_id']);
+                $this->db->where("taa.assign_id", $data['empid']);
                 if($head==1){
-                    $this->db->where("DATE(taa.date) =", "CURDATE()", FALSE);
+                    $this->db->where("DATE(taa.date)", date('Y-m-d'), FALSE);
                 }
                 $this->db->where("taa.active_status", "active");
                 $this->db->where("taa.goto_status", 0);
@@ -450,13 +466,13 @@ class Happyadminservicemodel extends CI_Model
         }else if($mode ==4){
             // get today task -> Direct Profiles
             try {
-                $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
                 $this->db->from("tbl_assign_approve_calls tap");
                 $this->db->join("tbl_registration r", "r.id=tap.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
-                $this->db->where("tap.assign_id", $data['emp_id']);
+                $this->db->where("tap.assign_id", $data['empid']);
                 if($head==1){
-                    $this->db->where("DATE(tap.date) =", "CURDATE()", FALSE);
+                    $this->db->where("DATE(tap.date)", date('Y-m-d'), FALSE);
                 }
                 $this->db->where("tap.active_status", "active");
                 $this->db->like("tap.goto_status", "quick%");
@@ -476,7 +492,6 @@ class Happyadminservicemodel extends CI_Model
 
                 return json_encode($json);
             } catch (Exception $e) {
-                echo($e);
                 return json_encode([
                     "data"=>[],
                     "error" => true,
@@ -487,13 +502,13 @@ class Happyadminservicemodel extends CI_Model
         }else if($mode ==5){
              // get today task -> Chat Support 
             try {
-                $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
                 $this->db->from("tbl_assign_approve_calls tap");
                 $this->db->join("tbl_registration r", "r.id=tap.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
-                $this->db->where("tap.assign_id", $data['emp_id']);
+                $this->db->where("tap.assign_id", $data['empid']);
                 if($head==1){
-                    $this->db->where("DATE(tap.date) =", "CURDATE()", FALSE);
+                    $this->db->where("DATE(tap.date)",date('Y-m-d'), FALSE);
                 }
                 $this->db->where("tap.active_status", "active");
                 $this->db->like("tap.goto_status", "chat%");
@@ -513,7 +528,6 @@ class Happyadminservicemodel extends CI_Model
 
                 return json_encode($json);
             } catch (Exception $e) {
-                echo($e);
                 return json_encode([
                     "data"=>[],
                     "error" => true,
@@ -551,7 +565,7 @@ class Happyadminservicemodel extends CI_Model
                 $updatearr['postpone_date'] = $data['postpone_date'];
                 $updatearr['cdate'] = date("Y-m-d H:i:s");
                 $updatearr['message'] = $data['message'];
-                $updatearr['login_id'] = $data['emp_id'];
+                $updatearr['login_id'] = $data['empid'];
                 $updatearr['payment_id'] = $data['payment_id'];//reg id 
                 $updatearr['reason'] = $data['reason'];
                 $updatearr['delete_status'] = $data['dstatus'];
@@ -1264,7 +1278,7 @@ class Happyadminservicemodel extends CI_Model
             $res = $this->db->update("tbl_userimages", $ardata);
         } else if ($mode == 2) {
             $ardata['status'] = 1;
-            $ardata['approve_id'] = $data['emp_id'];
+            $ardata['approve_id'] = $data['empid'];
             $ardata['reason_status'] = $data['reason'];
             $ardata['message'] = $data['message'];
             $ardata['delete_date'] = date('Y-m-d');
@@ -1273,7 +1287,7 @@ class Happyadminservicemodel extends CI_Model
             $res = $this->db->update("tbl_registration", $ardata);
         } else if ($mode == 3) {
             $ardata['status'] = 3;
-            $ardata['delete_id'] = $data['emp_id'];
+            $ardata['delete_id'] = $data['empid'];
             $ardata['reason_status'] = $data['reason'];
             $ardata['message'] = $data['message'];
             $ardata['delete_date'] = date('Y-m-d');
@@ -1282,7 +1296,7 @@ class Happyadminservicemodel extends CI_Model
             $res = $this->db->update("tbl_registration", $ardata);
         } else if ($mode == 4) {
             $ardata['status'] = 4;
-            $ardata['block_id'] = $data['emp_id'];
+            $ardata['block_id'] = $data['empid'];
             $ardata['block_status'] = $data['reason'];
             $ardata['block_description'] = $data['message'];
             $ardata['block_date'] = date('Y-m-d');
@@ -1290,7 +1304,7 @@ class Happyadminservicemodel extends CI_Model
             $res = $this->db->update("tbl_registration", $ardata);
         } else if ($mode == 5) {
             $ardata['status'] = 1;
-            $ardata['block_id'] = $data['emp_id'];
+            $ardata['block_id'] = $data['empid'];
             $ardata['block_description'] = $data['message'];
             $ardata['block_date'] = date('Y-m-d');
             $this->db->where("id", $data["user_id"]);
@@ -1316,7 +1330,7 @@ class Happyadminservicemodel extends CI_Model
             } else {
                 $arrdata['user_id'] = $data["user_id"];
                 $arrdata['hide_status'] = 1;
-                $arrdata['emp_id'] = $data['emp_id'];
+                $arrdata['emp_id'] = $data['empid'];
                 $arrdata['hide_date'] = date('Y-m-d');
                 $arrdata['hide_description'] = $data['message'];
                 $res = $this->db->insert("tbl_hideprofile", $arrdata);
@@ -1338,8 +1352,8 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->update("tbl_payement", $arrdata);
             }
             $arrdata['user_id'] = $data["user_id"];
-            $arrdata['session_id'] = $data["emp_id"];
-            $arrdata['payment_staff_id'] = $data["emp_id"];
+            $arrdata['session_id'] = $data["empid"];
+            $arrdata['payment_staff_id'] = $data["empid"];
             $arrdata['payment'] = $data["paymode"];
             $arrdata['description'] = $data['planname'];
             $arrdata['date'] = $data['date'];
@@ -1548,7 +1562,7 @@ class Happyadminservicemodel extends CI_Model
             $msg = "Your Happy Nikah Id :" . $query["id"] . " Password:" . $password . "
                     Hi " . $query["name"] . ", Welcome to happynikah. To know your  details through online on happynikah.com. SYSOL SYSTEM SOLUTIONS PRIVATE LIMITED";
             $ret = $this->smsotp(urlencode($msg), $query["phone"]);
-            echo $ret;
+
             return json_encode($jsondata);
         }
     }
@@ -1558,7 +1572,7 @@ class Happyadminservicemodel extends CI_Model
         // $templateid = 1607100000000205213;
         // $url = 'https://2factor.in/API/V1/7a8571c8-ed69-11ec-9c12-0200cd936042/SMS/' . $mobile . '/OTP+VERIFICATION';
         $url = 'https://2factor.in/API/R1/?module=TRANS_SMS&apikey=7a8571c8-ed69-11ec-9c12-0200cd936042&to=' . $mobile . '&from=SYSOLS&templatename=OTP+Template&var1=' . $msg . '&var3=happynikah.com';
-        echo $url;
+
         $ch = curl_init();
         $timeout = 5;
         curl_setopt($ch, CURLOPT_URL, $url);
