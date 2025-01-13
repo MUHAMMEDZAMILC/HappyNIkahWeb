@@ -186,7 +186,7 @@ class Happyadminservicemodel extends CI_Model
                 $json['error'] = false;
                 $json['msg'] = "Get Data";
 
-                if ($mode == 0 && $head == 1) {
+                if($mode == 0 && $head == 1){
                     $json['data'] = [
                         array("id" => 0, "value" => "Lead Calls"),
                         array("id" => 2, "value" => "Approve Calls"),
@@ -195,32 +195,32 @@ class Happyadminservicemodel extends CI_Model
                         array("id" => 5, "value" => "Chat Support"),
                         array("id" => 6, "value" => "Followup Calls"),
                         array("id" => 7, "value" => "Postpond"),
-                    ];
-                } else if ($mode == 0 && $head == 2) {
+                    ]; 
+                } else if($mode == 0 && $head == 2){
                     $json['data'] = [
                         array("id" => 1, "value" => "New Leads"),
                         array("id" => 2, "value" => "Pending Leads"),
                         array("id" => 3, "value" => "Other Leads"),
                         // array("id" => 4, "value" => "Converted Leads"),
-
-                    ];
-                } else if ($mode == 0 && $head == 3) {
+                       
+                    ]; 
+                } else if($mode == 0 && $head == 3){
                     $json['data'] = [
                         array("id" => 1, "value" => "Approve Calls"),
                         array("id" => 2, "value" => "Active Calls"),
                         array("id" => 3, "value" => "Direct Register"),
                         array("id" => 4, "value" => "Chat Support"),
                         array("id" => 5, "value" => "Pending FollowUp Calls"),
-
-                    ];
-                } else {
+                       
+                    ]; 
+                }else{
                     $json['data'] = [
                         array("id" => 1, "value" => "Today Tasks"),
                         array("id" => 2, "value" => "Lead Calls"),
                         array("id" => 3, "value" => "Sales Calls"),
                     ];
                 }
-
+                
             } catch (Exception $e) {
                 $json = array();
                 $json['error'] = true;
@@ -240,6 +240,7 @@ class Happyadminservicemodel extends CI_Model
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         $mode = $_GET['mode'];
+        $head = isset($_GET['head'])? $_GET['mode'] : "";
         // print_r($data);
         if ($mode == 0) {
             // get today task -> Lead Assign Self
@@ -248,6 +249,10 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->from("tbl_lead tl");
                 $this->db->where("tl.staff_id", $data['emp_id']);
                 $this->db->where("tl.status", "active");
+                if($head==1){
+                    $this->db->where("DATE(tl.created_on) =", "CURDATE()", FALSE);
+                }
+                
                 $query1 = $this->db->get();
                 $query1arr = array();
                 $query1arr = $query1->result_array();
@@ -258,12 +263,15 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->where("tal.assign_id", $data['emp_id']);
                 $this->db->where("tl.staff_id", $data['emp_id']);
                 $this->db->where("tl.status", "active");
+                if($head==1){
+                    $this->db->where("DATE(tl.created_on) =", "CURDATE()", FALSE);
+                }
                 $query2 = $this->db->get();
                 $query2arr = array();
                 $query2arr = $query2->result_array();
                 $result['data'] = array_merge($query1arr, $query2arr);
                 if (empty($result['data'])) {
-                    $result["data"] = [];
+                    $result["data"] =[];
                     $result['error'] = false;
                     $result['msg'] = 'Data Not Found';
                     $result['fun'] = 'Enter Message';
@@ -279,7 +287,7 @@ class Happyadminservicemodel extends CI_Model
                 return json_encode($result);
             } catch (Exception $e) {
                 return json_encode([
-                    "data" => [],
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => "Enter Message",
@@ -287,8 +295,8 @@ class Happyadminservicemodel extends CI_Model
             }
 
         } else if ($mode == 1) {
-            // create ot update lead Call status
-            try {
+             // create ot update lead Call status
+             try {
                 if (isset($data['leadid']) && $data['leadid'] != '') {
                     $updatearr = array();
                     $updatearr['user_name'] = $data['user_name'];
@@ -356,14 +364,13 @@ class Happyadminservicemodel extends CI_Model
 
                     return json_encode($result);
 
-                }
-
+                } 
             } catch (Exception $e) {
-                return json_encode([
-                    "error" => true,
-                    "msg" => "Server Down",
-                ]);
-            }
+                    return json_encode([
+                        "error" => true,
+                        "msg" => "Server Down",
+                    ]);
+                }
 
         } else if ($mode == 2) {
             // get today task -> Approve Calls
@@ -374,6 +381,10 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
                 $this->db->where("tap.assign_id", $data['emp_id']);
                 $this->db->where("tap.active_status", "active");
+                if($head==1){
+                    $this->db->where("DATE(tap.date) =", "CURDATE()", FALSE);
+                }
+                $this->db->where("tap.active_status", "active");
                 $this->db->where("tap.goto_status", 0);
                 $query = $this->db->get();
                 $json = array();
@@ -383,7 +394,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["msg"] = "Get Data";
                     $json['fun'] = 'Postpond Payment';
                 } else {
-                    $json["data"] = [];
+                    $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
                     $json['fun'] = 'Postpond Payment';
@@ -392,7 +403,7 @@ class Happyadminservicemodel extends CI_Model
                 return json_encode($json);
             } catch (Exception $e) {
                 return json_encode([
-                    "data" => [],
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => 'Postpond Payment'
@@ -407,6 +418,9 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->join("tbl_registration r", "r.id=taa.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
                 $this->db->where("taa.assign_id", $data['emp_id']);
+                if($head==1){
+                    $this->db->where("DATE(taa.date) =", "CURDATE()", FALSE);
+                }
                 $this->db->where("taa.active_status", "active");
                 $this->db->where("taa.goto_status", 0);
                 $query = $this->db->get();
@@ -417,7 +431,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["msg"] = "Get Data";
                     $json['fun'] = 'Postpond Payment';
                 } else {
-                    $json["data"] = [];
+                    $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
                     $json['fun'] = 'Postpond Payment';
@@ -426,14 +440,14 @@ class Happyadminservicemodel extends CI_Model
                 return json_encode($json);
             } catch (Exception $e) {
                 return json_encode([
-                    "data" => [],
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => 'Postpond Payment'
                 ]);
             }
 
-        } else if ($mode == 4) {
+        }else if($mode ==4){
             // get today task -> Direct Profiles
             try {
                 $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
@@ -441,6 +455,9 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->join("tbl_registration r", "r.id=tap.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
                 $this->db->where("tap.assign_id", $data['emp_id']);
+                if($head==1){
+                    $this->db->where("DATE(tap.date) =", "CURDATE()", FALSE);
+                }
                 $this->db->where("tap.active_status", "active");
                 $this->db->like("tap.goto_status", "quick%");
                 $query = $this->db->get();
@@ -451,7 +468,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["msg"] = "Get Data";
                     $json['fun'] = 'Postpond Payment';
                 } else {
-                    $json["data"] = [];
+                    $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
                     $json['fun'] = 'Postpond Payment';
@@ -459,22 +476,25 @@ class Happyadminservicemodel extends CI_Model
 
                 return json_encode($json);
             } catch (Exception $e) {
-                echo ($e);
+                echo($e);
                 return json_encode([
-                    "data" => [],
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => 'Postpond Payment'
                 ]);
             }
-        } else if ($mode == 5) {
-            // get today task -> Chat Support 
+        }else if($mode ==5){
+             // get today task -> Chat Support 
             try {
                 $this->db->select("r.id,r.happynikah_id hnid,r.name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
                 $this->db->from("tbl_assign_approve_calls tap");
                 $this->db->join("tbl_registration r", "r.id=tap.action_check");
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
                 $this->db->where("tap.assign_id", $data['emp_id']);
+                if($head==1){
+                    $this->db->where("DATE(tap.date) =", "CURDATE()", FALSE);
+                }
                 $this->db->where("tap.active_status", "active");
                 $this->db->like("tap.goto_status", "chat%");
                 $query = $this->db->get();
@@ -485,7 +505,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["msg"] = "Get Data";
                     $json['fun'] = 'Postpond Payment';
                 } else {
-                    $json["data"] = [];
+                    $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
                     $json['fun'] = 'Postpond Payment';
@@ -493,17 +513,17 @@ class Happyadminservicemodel extends CI_Model
 
                 return json_encode($json);
             } catch (Exception $e) {
-                echo ($e);
+                echo($e);
                 return json_encode([
-                    "data" => [],
+                    "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
                     "fun" => 'Postpond Payment'
                 ]);
             }
-        } else {
+        }else{
             return json_encode([
-                "data" => [],
+                "data"=>[],
                 "error" => true,
                 "msg" => "Server Down",
                 "fun" => 'Postpond Payment'
@@ -733,14 +753,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->select("id,name value");
                 $this->db->from("tbl_country");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } elseif ($mode == 2) {
                 $json = array();
@@ -753,14 +773,14 @@ class Happyadminservicemodel extends CI_Model
                     $this->db->where("country_id", $_GET['head']);
                 }
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } elseif ($mode == 3) {
                 $json = array();
@@ -773,14 +793,14 @@ class Happyadminservicemodel extends CI_Model
                     $this->db->where("state_id", $_GET['head']);
                 }
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } elseif ($mode == 4) {
                 $json = array();
@@ -793,14 +813,14 @@ class Happyadminservicemodel extends CI_Model
                     $this->db->where("district_id", $_GET['head']);
                 }
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 5) {
                 $json = array();
@@ -816,7 +836,7 @@ class Happyadminservicemodel extends CI_Model
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 6) {
                 $json = array();
@@ -871,10 +891,10 @@ class Happyadminservicemodel extends CI_Model
                 $json["data"] = [
                     ["id" => "0", "value" => "Normal"],
                     ["id" => "1", "value" => "Physically Challenged"]
-
+    
                 ];
-
-
+    
+    
                 return json_encode($json);
             } else if ($mode == 10) {
                 $json = array();
@@ -1055,7 +1075,7 @@ class Happyadminservicemodel extends CI_Model
                 $json['error'] = false;
                 $json['msg'] = "";
                 for ($i = 18; $i <= 70; $i++) {
-
+    
                     $json['data'][] = array("id" => "$i", "value" => "$i");
                 }
                 return json_encode($json);
@@ -1067,14 +1087,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->select("height_id id,height value");
                 $this->db->from("tbl_height");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 24) {
                 $json = array();
@@ -1084,14 +1104,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->select("weight_id id,weight value");
                 $this->db->from("tbl_weight");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 25) {
                 $json = array();
@@ -1101,14 +1121,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->select("id,skincolor value");
                 $this->db->from("tbl_skincolor");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 26) {
                 $json = array();
@@ -1117,9 +1137,9 @@ class Happyadminservicemodel extends CI_Model
                 $json["data"] = [
                     ["id" => "0", "value" => "Interest to Login"],
                     ["id" => "1", "value" => "Others"]
-
+    
                 ];
-
+    
                 return json_encode($json);
             } else if ($mode == 27) {
                 $json = array();
@@ -1129,14 +1149,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->select("id,reason value");
                 $this->db->from("tbl_deletereason");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 28) {
                 $json = array();
@@ -1146,14 +1166,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->select("plan_id id,plan_name pname,duration, plan_strick_amount pamt,contacts,messages,months days");
                 $this->db->from("tbl_plan");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 29) {
                 $json = array();
@@ -1164,14 +1184,14 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->where("user_type", 3);
                 $this->db->from("tbl_users1");
                 $query = $this->db->get();
-
+    
                 if ($query->num_rows() > 0) {
                     $json["data"] = $query->result_array();
                 } else {
                     $json["error"] = true;
                     $json["msg"] = "Data Not Found";
                 }
-
+    
                 return json_encode($json);
             } else if ($mode == 30) {
                 $json = array();
@@ -1196,7 +1216,7 @@ class Happyadminservicemodel extends CI_Model
                     $this->db->or_where("status", 3);
                     $this->db->from("tbl_usertype");
                     $query = $this->db->get();
-
+        
                     if ($query->num_rows() > 0) {
                         $json["data"] = $query->result_array();
                     } else {
@@ -1206,22 +1226,22 @@ class Happyadminservicemodel extends CI_Model
                     return json_encode($json);
                 } catch (Exception $th) {
                     return json_encode([
-                        "data" => [],
-                        "error" => true,
-                        "msg" => "Server Down"
+                        "data"=>[],
+                        "error"=>true,
+                        "msg"=>"Server Down"
                     ]);
                 }
-
-
+                
+                
             }
         } catch (Exception $th) {
             return json_encode([
-                "data" => [],
-                "error" => true,
-                "msg" => "Server Down"
+                "data"=>[],
+                "error"=>true,
+                "msg"=>"Server Down"
             ]);
         }
-
+        
     }
 
     public function SendActivity()
