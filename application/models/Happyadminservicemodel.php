@@ -199,9 +199,9 @@ class Happyadminservicemodel extends CI_Model
                 } else if($mode == 0 && $head == 2){
                     $json['data'] = [
                         array("id" => 0, "value" => "New Leads"),
-                        array("id" => 2, "value" => "Pending Leads"),
-                        array("id" => 3, "value" => "Other Leads"),
-                        // array("id" => 4, "value" => "Converted Leads"),
+                        array("id" => 8, "value" => "Pending Leads"),
+                        array("id" => 3, "value" => "Dead Leads"),
+                        array("id" => 4, "value" => "Converted Leads"),
                        
                     ]; 
                 } else if($mode == 0 && $head == 3){
@@ -210,7 +210,7 @@ class Happyadminservicemodel extends CI_Model
                         array("id" => 3, "value" => "Active Calls"),
                         array("id" => 4, "value" => "Direct Register"),
                         array("id" => 5, "value" => "Chat Support"),
-                        array("id" => 5, "value" => "Pending FollowUp Calls"),
+                        array("id" => 6, "value" => "Pending FollowUp Calls"),
                        
                     ]; 
                 }else{
@@ -245,7 +245,7 @@ class Happyadminservicemodel extends CI_Model
         if ($mode == 0) {
             // get today task -> Lead Assign Self
             try {
-                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
+                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone,CAST(tl.staff_id AS UNSIGNED) staff_id,tl.data_source,tl.created_on date");
                 $this->db->from("tbl_lead tl");
                 $this->db->where("tl.staff_id",$data['empid']);
                 $this->db->where("tl.status", "active");
@@ -262,7 +262,7 @@ class Happyadminservicemodel extends CI_Model
                 }, $query1->result_array());
 
                 // get today task -> Lead Assign Other
-                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
+                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone, CAST(tl.staff_id AS UNSIGNED) staff_id,tl.data_source,tl.created_on date");
                 $this->db->from("tbl_lead tl");
                 $this->db->join("tbl_assign_leads tal", "tal.action_check=tl.id");
                 $this->db->where("tal.assign_id",$data['empid']);
@@ -283,13 +283,13 @@ class Happyadminservicemodel extends CI_Model
                     $result["data"] =[];
                     $result['error'] = false;
                     $result['msg'] = 'Data Not Found';
-                    $result['fun'] = 'Enter Message';
+                    $result['fun'] = 'Enter Details';
 
                 } else {
 
                     $result['error'] = false;
                     $result['msg'] = 'Get Data';
-                    $result['fun'] = 'Enter Message';
+                    $result['fun'] = 'Enter Details';
 
                 }
 
@@ -299,7 +299,7 @@ class Happyadminservicemodel extends CI_Model
                     "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
-                    "fun" => "Enter Message",
+                    "fun" => "Enter Details",
                 ]);
             }
 
@@ -315,8 +315,10 @@ class Happyadminservicemodel extends CI_Model
                     $updatearr['user_gender'] = $data['user_gender'];
                     $updatearr['message'] = $data['message'];
                     $updatearr['lead_status'] = $data['lead_status'];
+                    $updatearr['user_location'] = $data['user_location'];
                     $updatearr['updated_on'] = date('Y-m-d');
                     $updatearr['update_id'] = $data['update_id'];
+                    $updatearr['followdate'] = $data['followdate'];
                     $updatearr['happynikah_id'] = $data['happynikah_id'];
                     $this->db->where("id", $data['leadid']);
                     $this->db->update("tbl_lead", $updatearr);
@@ -391,6 +393,18 @@ class Happyadminservicemodel extends CI_Model
         } else if ($mode == 2) {
             // get today task -> Approve Calls
             try {
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,r.reg_date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->from("tbl_registration r");
+                $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+                $this->db->where("r.status", $data['empid']);
+                if($head==1){
+                    $this->db->where("DATE(r.reg_date)", date('Y-m-d'), FALSE);
+                }
+                $this->db->where("r.goto_nikah", 0);
+                $query0 = $this->db->get();
+                $query0arr = array();
+                $query0arr = $query0->result_array();
+
                 $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tap.date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
                 $this->db->from("tbl_assign_approve_calls tap");
                 $this->db->join("tbl_registration r", "r.id=tap.action_check");
@@ -403,16 +417,20 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->where("tap.active_status", "active");
                 $this->db->where("tap.goto_status", 0);
                 $query = $this->db->get();
+                $queryarr = array();
+                $queryarr = $query->result_array();
                 $json = array();
                 if ($query->num_rows() > 0) {
-                    $json["data"] = $query->result_array();
+                    $json["data"] = array_merge($query0arr, $queryarr);
                     $json["error"] = false;
                     $json["msg"] = "Get Data";
+                    $json['fun0'] = 'Followup';
                     $json['fun'] = 'Postpond Payment';
                 } else {
                     $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
+                    $json['fun0'] = 'Followup';
                     $json['fun'] = 'Postpond Payment';
                 }
 
@@ -422,6 +440,7 @@ class Happyadminservicemodel extends CI_Model
                     "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
+                    "fun0" => "Followup",
                     "fun" => 'Postpond Payment'
                 ]);
             }
@@ -445,11 +464,13 @@ class Happyadminservicemodel extends CI_Model
                     $json["data"] = $query->result_array();
                     $json["error"] = false;
                     $json["msg"] = "Get Data";
+                    $json['fun0'] = 'Followup';
                     $json['fun'] = 'Postpond Payment';
                 } else {
                     $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
+                    $json['fun0'] = 'Followup';
                     $json['fun'] = 'Postpond Payment';
                 }
 
@@ -459,6 +480,7 @@ class Happyadminservicemodel extends CI_Model
                     "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
+                    "fun0" => "Followup",
                     "fun" => 'Postpond Payment'
                 ]);
             }
@@ -482,11 +504,13 @@ class Happyadminservicemodel extends CI_Model
                     $json["data"] = $query->result_array();
                     $json["error"] = false;
                     $json["msg"] = "Get Data";
+                    $json['fun0'] = 'Followup';
                     $json['fun'] = 'Postpond Payment';
                 } else {
                     $json["data"] =[];
                     $json["error"] = false;
                     $json["msg"] = "Data Not Found";
+                    $json['fun0'] = 'Followup';
                     $json['fun'] = 'Postpond Payment';
                 }
 
@@ -496,6 +520,7 @@ class Happyadminservicemodel extends CI_Model
                     "data"=>[],
                     "error" => true,
                     "msg" => "Server Down",
+                    "fun0" => "Followup",
                     "fun" => 'Postpond Payment'
                 ]);
             }
@@ -512,6 +537,44 @@ class Happyadminservicemodel extends CI_Model
                 }
                 $this->db->where("tap.active_status", "active");
                 $this->db->like("tap.goto_status", "chat%");
+                $query = $this->db->get();
+                $json = array();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                    $json["error"] = false;
+                    $json["msg"] = "Get Data";
+                    $json['fun0'] = 'Followup';
+                    $json['fun'] = 'Postpond Payment';
+                } else {
+                    $json["data"] =[];
+                    $json["error"] = false;
+                    $json["msg"] = "Data Not Found";
+                    $json['fun0'] = 'Followup';
+                    $json['fun'] = 'Postpond Payment';
+                }
+
+                return json_encode($json);
+            } catch (Exception $e) {
+                return json_encode([
+                    "data"=>[],
+                    "error" => true,
+                    "msg" => "Server Down",
+                    "fun0" => "Followup",
+                    "fun" => 'Postpond Payment'
+                ]);
+            }
+        }else if($mode ==6){
+            // get follow up
+            try {
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tf.fdate date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->from("tbl_followup tf");
+                $this->db->join("tbl_registration r", "r.id=tf.uid");
+                $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+                $this->db->where("tf.login_id", $data['empid']);
+                if($head==1){
+                    $this->db->where("DATE(tf.fdate)",date('Y-m-d'), FALSE);
+                }
+                $this->db->where("tf.delete_status", "Active");
                 $query = $this->db->get();
                 $json = array();
                 if ($query->num_rows() > 0) {
@@ -535,11 +598,93 @@ class Happyadminservicemodel extends CI_Model
                     "fun" => 'Postpond Payment'
                 ]);
             }
+
+        }else if($mode ==7){
+            // get postponds
+            try {
+                $this->db->select("r.id,r.happynikah_id hnid,r.name name,case when r.gender=1 then 'Male' else 'Female' end gender,r.phone,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,ifnull(d.district,'') native_district,tpa.postpone_date date,CASE when r.reg_through=0 then 'Website' ELSE CASE when r.reg_through=1 then 'Admin' ELSE 'Mobile App' end end platform");
+                $this->db->from("tbl_paymentrequest tpa");
+                $this->db->join("tbl_registration r", "r.id=tpa.payment_id");
+                $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
+                $this->db->where("tpa.login_id", $data['empid']);
+                if($head==1){
+                    $this->db->where("DATE(tpa.postpone_date)",date('Y-m-d'), FALSE);
+                }
+                $this->db->where("tpa.delete_status", "Active");
+                $query = $this->db->get();
+                $json = array();
+                if ($query->num_rows() > 0) {
+                    $json["data"] = $query->result_array();
+                    $json["error"] = false;
+                    $json["msg"] = "Get Data";
+                    $json['fun'] = 'Postpond Payment';
+                } else {
+                    $json["data"] =[];
+                    $json["error"] = false;
+                    $json["msg"] = "Data Not Found";
+                    $json['fun'] = 'Postpond Payment';
+                }
+
+                return json_encode($json);
+            } catch (Exception $e) {
+                return json_encode([
+                    "data"=>[],
+                    "error" => true,
+                    "msg" => "Server Down",
+                    "fun" => 'Postpond Payment'
+                ]);
+            }
+
+        }else if($mode==8){
+            // pending Leads
+            try {
+                $this->db->select("CAST(tl.id AS UNSIGNED) lid,tl.lead_id leadid,tl.user_name name,user_phone phone,tl.staff_id,tl.data_source,tl.created_on date");
+                $this->db->from("tbl_lead tl");
+                $this->db->where("tl.staff_id",$data['empid']);
+                $this->db->where("tl.call_type IN ('Ring','Busy','Swiched off')");
+                $this->db->where("tl.lead_id!=", "");
+                if($head==1){
+                    $this->db->where("DATE(tl.created_on)", date('Y-m-d'));
+                }
+                
+                $query1 = $this->db->get();
+                $query1arr = array();
+                $query1arr = array_map(function($item) {
+                    $item['lid'] = (int) $item['lid'];  // Convert lid to integer
+                    return $item;
+                }, $query1->result_array());
+                $result = array();
+                if (empty($query1arr)) {
+                    $result["data"] =$query1arr;
+                    $result['error'] = false;
+                    $result['msg'] = 'Data Not Found';
+                    $result['fun'] = 'Enter Message';
+
+                } else {
+
+                    $result['error'] = false;
+                    $result['msg'] = 'Get Data';
+                    $result['fun'] = 'Enter Message';
+
+                }
+
+                return json_encode($result);
+               
+
+            } catch (Exception $e) {
+                return json_encode([
+                    "data"=>[],
+                    "error" => true,
+                    "msg" => "Server Down",
+                    "fun" => "Enter Message",
+                ]);
+            }
         }else{
             return json_encode([
                 "data"=>[],
                 "error" => true,
                 "msg" => "Server Down",
+                "fun0" => "Followup",
                 "fun" => 'Postpond Payment'
             ]);
         }
