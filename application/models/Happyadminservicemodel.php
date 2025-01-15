@@ -679,7 +679,62 @@ class Happyadminservicemodel extends CI_Model
                     "fun" => "Enter Message",
                 ]);
             }
-        }else{
+        }else if ($mode == 9) {
+            // enter follow up 
+            try {
+                    $this->db->select("tfp.*");
+                    $this->db->from("tbl_followup tfp");
+                    $this->db->where("tfp.uid", $data['leadid']);
+                    $this->db->where("tfp.login_id", $data['empid']);
+                    $query = $this->db->get();
+                    if ($query->num_rows() > 0) {
+                        $updatearr = array();
+                        $updatearr['fdate'] = $data['followdate'];
+                        $updatearr['status'] = $data['lead_status'];
+                        $updatearr['message'] = $data['message'];
+                        $this->db->where("uid", $data['leadid']);
+                        $this->db->where("login_id", $data['empid']);
+                        $res =$this->db->update("tbl_followup", $updatearr);
+                        if ($res) {
+                            $result = array('error' => false, 'msg' => 'Follow Up Updated');
+                        } else {
+                            $result = array('error' => true, 'msg' => 'Failed to update Follow Up');
+                        }
+                        return json_encode($result);
+                    }else{
+                        $updatearr = array();
+                        $updatearr['fdate'] = $data['followdate'];
+                        $updatearr['status'] = $data['lead_status'];
+                        $updatearr['message'] = $data['message'];
+                        $updatearr['cdate'] = date("Y-m-d H:i:s");
+                        $updatearr['cur_date'] = date("Y-m-d");
+                        $updatearr['uid'] = $data['leadid'];
+                        $updatearr['login_id'] = $data['empid'];
+                        $updatearr['delete_status'] = 'Active';
+                        $res = $this->db->insert("tbl_followup", $updatearr);
+                        if ($res) {
+
+                            $result['error'] = false;
+                            $result['msg'] = 'Follow Up Success';
+
+                        } else {
+
+                            $result['error'] = true;
+                            $result['msg'] = 'Failed to Follow Up';
+
+                        }
+                        return json_encode($result);
+                    }
+
+                
+            } catch (Exception $e) {
+                return json_encode([
+                    "error" => true,
+                    "msg" => "Server Down",
+                ]);
+            }
+
+        } else {
             return json_encode([
                 "data"=>[],
                 "error" => true,
