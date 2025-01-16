@@ -572,7 +572,7 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
                 $this->db->where("tf.login_id", $data['empid']);
                 if($head==1){
-                    $this->db->where("DATE(tf.fdate)",date('Y-m-d'), FALSE);
+                    $this->db->where("DATE(tf.fdate)",date('d-m-Y'), FALSE);
                 }
                 $this->db->where("tf.delete_status", "Active");
                 $query = $this->db->get();
@@ -608,7 +608,7 @@ class Happyadminservicemodel extends CI_Model
                 $this->db->join("tbl_district d", "d.district_id=r.native_district", "left");
                 $this->db->where("tpa.login_id", $data['empid']);
                 if($head==1){
-                    $this->db->where("DATE(tpa.postpone_date)",date('Y-m-d'), FALSE);
+                    $this->db->where("DATE(tpa.postpone_date)",date('d-m-Y'), FALSE);
                 }
                 $this->db->where("tpa.delete_status", "Active");
                 $query = $this->db->get();
@@ -689,7 +689,7 @@ class Happyadminservicemodel extends CI_Model
                     $query = $this->db->get();
                     if ($query->num_rows() > 0) {
                         $updatearr = array();
-                        $updatearr['fdate'] = $data['followdate'];
+                        $updatearr['fdate'] =date('d-m-Y', strtotime($data['followdate'])); ;
                         $updatearr['status'] = $data['lead_status'];
                         $updatearr['message'] = $data['message'];
                         $this->db->where("uid", $data['leadid']);
@@ -703,7 +703,7 @@ class Happyadminservicemodel extends CI_Model
                         return json_encode($result);
                     }else{
                         $updatearr = array();
-                        $updatearr['fdate'] = $data['followdate'];
+                        $updatearr['fdate'] =date('d-m-Y', strtotime($data['followdate'])); 
                         $updatearr['status'] = $data['lead_status'];
                         $updatearr['message'] = $data['message'];
                         $updatearr['cdate'] = date("Y-m-d H:i:s");
@@ -752,9 +752,68 @@ class Happyadminservicemodel extends CI_Model
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         $mode = $_GET['mode'];
+        $head = $_GET['head'];
 
         if ($mode == 0) {
-
+            $result = array();
+            try {
+                if($head==0){
+                    // check follow up status
+                    $this->db->select("tfp.*");
+                    $this->db->from("tbl_followup tfp");
+                    $this->db->where("tfp.uid", $data['user_id']);
+                    $this->db->where("tfp.login_id", $data['empid']);
+                    $this->db->where("tfp.status", 'Interested');
+                    $this->db->where("DATE(tfp.fdate) >=", date('d-m-Y'));
+                    $query = $this->db->get();
+                    if ($query->num_rows() > 0) {
+                        $result['error'] = true;
+                        $result['msg'] = 'Already Followed';
+                    }else{
+                        $result['error'] = false;
+                        $result['msg'] = 'You have to Follow Up';
+                    }
+                }else if($head ==1){
+                    // check post pond check
+    
+                    // first check enter messaged
+                    $this->db->select("tfp.*");
+                    $this->db->from("tbl_followup tfp");
+                    $this->db->where("tfp.uid", $data['user_id']);
+                    $this->db->where("tfp.login_id", $data['empid']);
+                    $this->db->where("tfp.status", 'Interested');
+                    $this->db->where("DATE(tfp.fdate) >=", date('d-m-Y'));
+                    $query = $this->db->get();
+                    if ($query->num_rows() > 0) {
+                        // check already postponded
+                        $this->db->select("tpr.*");
+                        $this->db->from("tbl_paymentrequest tpr");
+                        $this->db->where("tpr.payment_id", $data['user_id']);
+                        $this->db->where("tpr.login_id", $data['empid']);
+                        $this->db->where("DATE(tpr.postpone_date) >=", date('d-m-Y'));
+                        $query1 = $this->db->get();
+                        if ($query1->num_rows() > 0) {
+                            $result['error'] = true;
+                            $result['msg'] = 'Already Payment Postponded';
+                        }else{
+                            $result['error'] = false;
+                            $result['msg'] = 'You Have to Payment Postponded';
+                        }
+                    }else{
+                        $result['error'] = true;
+                        $result['msg'] = 'You Must have to Follow Up';
+                    }
+                }
+                return json_encode($result);
+            } catch (Exception $th) {
+                return json_encode([
+                    "error" => true,
+                    "msg" => "Server Down",
+                ]);
+            }
+            
+            
+           
         } else if ($mode == 1) {
             // post pond payment 
             try {
@@ -762,14 +821,14 @@ class Happyadminservicemodel extends CI_Model
                 $updatearr = array();
                 $updatearr['plan_id'] = $data['plan_id'];
                 $updatearr['plan_type'] = $data['plan_type'];
-                $updatearr['postpone_date'] = $data['postpone_date'];
+                $updatearr['postpone_date'] = date('d-m-Y', strtotime($data['postpone_date']));
                 $updatearr['cdate'] = date("Y-m-d H:i:s");
                 $updatearr['message'] = $data['message'];
                 $updatearr['login_id'] = $data['empid'];
                 $updatearr['payment_id'] = $data['payment_id'];//reg id 
                 $updatearr['reason'] = $data['reason'];
                 $updatearr['delete_status'] = $data['dstatus'];
-                $updatearr['paid_status'] = $data['pstatus'];
+                $updatearr['paid_status'] = 'UnPaid';
                 $updatearr['crnt_date'] = date("Y-m-d");
                 if (isset($data['paymentreq_id']) && $data['paymentreq_id'] != '') {
                     $this->db->select("*");
@@ -783,23 +842,24 @@ class Happyadminservicemodel extends CI_Model
                         if ($this->db->affected_rows() > 0) {
 
                             $result['error'] = false;
-                            $result['msg'] = 'Payment Postpond updated successfully';
+                            $result['msg'] = 'Payment Postpond Updated successfully';
+                            
                         } else {
 
                             $result['error'] = true;
-                            $result['msg'] = 'Failed to update Payment Postpond';
+                            $result['msg'] = 'Failed to Update Payment Postpond';
                         }
                     } else {
                         $res = $this->db->insert("tbl_paymentrequest", $updatearr);
                         if ($res) {
 
                             $result['error'] = false;
-                            $result['msg'] = 'Payment Postpond Upload successfully';
+                            $result['msg'] = 'Payment Postpond successfully';
 
                         } else {
 
                             $result['error'] = true;
-                            $result['msg'] = 'Failed to Upload Payment Postpond';
+                            $result['msg'] = 'Failed to Payment Postpond';
 
                         }
                     }
@@ -809,6 +869,11 @@ class Happyadminservicemodel extends CI_Model
                     if ($res) {
                         $result['error'] = false;
                         $result['msg'] = 'Payment Postpond Upload successfully';
+                        $updateapparr = array();
+                        $updateapparr['active_status']='Inactive';
+                        $this->db->where("action_check",$data['payment_id']);
+                        $this->db->where("assign_id",$data['empid']);
+                        $this->db->update("tbl_assign_approve_calls",$updateapparr);
 
                     } else {
                         $result['error'] = true;
@@ -1377,7 +1442,7 @@ class Happyadminservicemodel extends CI_Model
                 $json["error"] = false;
                 $json["msg"] = "";
                 $json["data"] = array();
-                $this->db->select("plan_id id,plan_name pname,duration, plan_strick_amount pamt,contacts,messages,months days");
+                $this->db->select("plan_id id,plan_name value,duration, plan_strick_amount pamt,contacts,messages,months days");
                 $this->db->from("tbl_plan");
                 $query = $this->db->get();
     
