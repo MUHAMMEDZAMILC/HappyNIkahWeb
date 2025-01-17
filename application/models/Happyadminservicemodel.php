@@ -1895,8 +1895,8 @@ class Happyadminservicemodel extends CI_Model
 
         $maritalStatus = [0 => "All", 1 => "Unmarried", 2 => "Divorced", 3 => "Widow"];
 
-
-        $strbelief = array();
+        try {
+            $strbelief = array();
         $resbelief = "";
         if (isset($data['belief']) && $data['belief'] != "") {
             //echo $data['belief'];
@@ -2082,7 +2082,7 @@ class Happyadminservicemodel extends CI_Model
 
         // $this->db->select("r.id,name,concat(age,' Yrs') age,ifnull(h.height,'') height,ifnull(c.sub_caste,'') belief,native_place,ifnull(d.district,'') native_district,ifnull(job_name,'') job,case when photo='' then '$photo' else case when u.status=2 then  photo else '$photo' end end photo,ifnull(s.shortlist_id,0) shortlist,ifnull(i.interest_id,0) interest,ifnull(l.like_id,0) liked,r.phone,case when p.status=1 then 'Public' else r.photo_visibility end photo_visibility");
         $this->db->select("r.id,r.name,concat( CASE WHEN r.dob IS NULL THEN r.age ELSE CASE when YEAR(r.dob) > 1950 THEN TIMESTAMPDIFF(YEAR,r.dob,CURDATE()) ELSE r.age END END,' Yrs') age,
-                            ifnull(c.caste,'') belief,case when photo='' then case when r.gender =1 then 'male.png' else 'female.png' end else case when u.status=2 then  photo else '$photo' end end photo ,
+                            ifnull(c.caste,'') belief,case when photo='' then case when r.gender =1 then 'male.png' else 'female.png' end else case when u.status=2 then  photo else 'male.png' end end photo ,
                             ifnull(r.marital_status,'') marital_status,r.phone,r.happynikah_id,ifnull(imgcount.imgcount,0) totimages,case when ifnull(py.user_id,0)!=0 then 1 else 0 end premium,
                             ul.is_online online,r.status,r.badge_status badge,case when thp.user_id IS NULL then 0 else thp.hide_status end 'hidestatus'", FALSE);
         $this->db->from("tbl_registration r");
@@ -2141,8 +2141,10 @@ class Happyadminservicemodel extends CI_Model
         $this->db->join("tbl_userlogin ul", "ul.user_id=r.id", "left");
         if (isset($data['happynikah_id']) && $data['happynikah_id'] != "") {
             $this->db->where("happynikah_id", $data['happynikah_id']);
+            $this->db->or_where("phone", $data['happynikah_id']);
         } else {
-            $this->db->where("r.id not in (select receiver_id from tbl_ignored where sender_id='" . $id . "')");
+            // 
+            // $this->db->where("r.id not in (select receiver_id from tbl_ignored where sender_id='" . $id . "')");
             if (isset($data['state']) && $data['state'] != "") {
                 $this->db->where("r.state", $data['state']);
             }
@@ -2201,15 +2203,24 @@ class Happyadminservicemodel extends CI_Model
         $query = $this->db->get();
         $json = array();
         if ($query->num_rows() > 0) {
-            $json = $query->result_array();
+            $json['error']= false;
+            $json['msg']= "Get Data";
+            $json['data'] = $query->result_array();
         } else {
             $json = [
-                array("error" => true, "msg" => "Data Not Found")
+                array("error" => false, "msg" => "Data Not Found")
             ];
             // $json["error"] = true;
             // $json["msg"] = "Data Not Found";
         }
         return json_encode($json);
+        } catch (Exception $th) {
+            $json = [
+                array("error" => true, "msg" => "Server Down")
+            ];
+            return json_encode($json);
+        }
+        
 
     }
 }
