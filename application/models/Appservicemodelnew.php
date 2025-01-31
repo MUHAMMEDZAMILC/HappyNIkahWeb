@@ -153,7 +153,7 @@ function getAccessToken()
         } else {
             $this->db->select("*");
             $this->db->from("tbl_registration");
-            $this->db->where("phone", $data['phone']);
+            $this->db->where("phone",str_replace(' ', '', $data['phone']));
             $this->db->where("status !=", 3);
             $checkexist = $this->db->get();
             if ($checkexist->num_rows() > 0) {
@@ -1998,7 +1998,7 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
         $this->db->where("r.id!=", 36030);
         $res = $this->db->update("tbl_registration r", $arraydata);
 
-        $this->db->select("r.phone,r.name,case when r.photo='' then case when r.gender='1' then 'male.png' else 'female.png' end  else r.photo end photo,r.mail,(ifnull(p.contactbalance,0)+ifnull(+p.addoncontact,0)-ifnull(p.leftcontact,0)) contacts,ifnull((p.messagebalance+p.addonmessage),0) messages,count(v.sender_id) totviewed,r.status,r.stage,r.happynikah_id,ifnull(DATEDIFF(p.expiry_date, CURDATE()),'0') daysleft,r.gender,r.badge_status,r.popup_date adsdate,r.goto_nikah");
+        $this->db->select("r.phone,r.name,case when r.photo='' then case when r.gender='1' then 'male.png' else 'female.png' end  else r.photo end photo,r.mail,ifnull((ifnull(p.contactbalance,0)+ifnull(p.addoncontact,0)-ifnull(p.leftcontact,0)),0) contacts,ifnull((p.messagebalance+p.addonmessage),0) messages,count(v.sender_id) totviewed,r.status,r.stage,r.happynikah_id,ifnull(DATEDIFF(p.expiry_date, CURDATE()),'0') daysleft,r.gender,r.badge_status,r.popup_date adsdate,r.goto_nikah");
         $this->db->from("tbl_registration r");
         $this->db->join("tbl_payement p", "r.id=p.user_id and p.expiry_date>CURDATE() and p.status=1", "left");
         $this->db->join("tbl_plan pl", "pl.plan_id=p.plan_id", "left");
@@ -2094,6 +2094,10 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
                 $jsondata = array();
                 $jsondata['user_id'] = (int) $res['id'];
                 $jsondata['phone'] = $phone;
+                $updatearray = array();
+                $updatearray['last_login'] = date('Y-m-d H:i:s');
+                $this->db->where("user_id", $res['id']);
+                $this->db->update("tbl_userlogin", $updatearray);
 
                 return json_encode($jsondata);
             } else {
@@ -2113,6 +2117,11 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
                 $jsondata = array();
                 if ($query->num_rows() > 0) {
                     $res = $query->row_array();
+                    // print_r($res);
+                    $updatearray = array();
+                    $updatearray['last_login'] = date('Y-m-d H:i:s');
+                    $this->db->where("user_id", $res['id']);
+                    $this->db->update("tbl_userlogin", $updatearray);
                     $phone = $res['phone'];
                     $jsondata = array();
                     $jsondata['user_id'] = (int) $res['id'];
@@ -2469,6 +2478,7 @@ SYSOL SYSTEM SOLUTIONS PRIVATE LIMITED";
     public function MatchingProfileLazyLoad($id, $limit, $endindex, $loadedids)
     {
         $m = (isset($_GET['m']) ? $_GET['m'] : 0);
+       
         $this->db->select("*");
         $this->db->from("tbl_registration");
         $this->db->where("id", $id);
@@ -3731,10 +3741,10 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
 
     }
 
-    public function Explore()
+    public function Explore($userid=null,$mm=null)
     {
-        $id = $_GET['mode'];
-        $m = $_GET['m'];
+        $id = $userid??$_GET['mode'];
+        $m = $mm??$_GET['m'];
         $limit = 10;
 
         $this->db->select("*");
@@ -3801,7 +3811,8 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
             $this->db->join("tbl_contact_viewed cv", "cv.receiver_id=r.id and cv.sender_id=" . $id);
             $this->db->order_by("cv.date", 'desc');
         }
-        if ($m == 4) {
+        if ($m == 4 || $m ==19) {
+
             $this->db->join("tbl_shortlist s", "s.receiver_id=r.id and s.sender_id=" . $id);
             $this->db->order_by("s.date", 'desc');
         } else {
@@ -4479,6 +4490,7 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
 
     private function AddNotification($data, $mode)
     {
+        
         $data["date"] = date("Y-m-d");
         $data["notification_type"] = $mode;
         if ($mode == 2 || $mode == 6) {
@@ -4487,6 +4499,157 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
             $data['sender_id'] = $receiver;
         }
         $this->db->insert("tbl_notification", $data);
+    }
+
+     // SEND NOTIFICATION WHEN USER NOT PROFILE IMAGE
+    public function PhotochecktoNotify(){
+        error_reporting(0);
+        ini_set('display_errors', '1');
+        $mode = $_GET['mode'];
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+          $this->db->select("r.id,r.photo,t.firebase_token,r.staff_id,r.notifydate");
+          $this->db->from("tbl_registration r");
+          $this->db->join("tbl_firebase_token t", "r.id=t.user_id", "left");
+          $this->db->where("r.photo=", '');
+          $this->db->where("r.status!=", 3);
+          $this->db->where("t.firebase_token!=", '');
+          $this->db->where("t.firebase_token IS NOT NULL");
+          $this->db->where("r.id", $data['sender_id']);
+          $this->db->group_by("r.id");
+          $query = $this->db->get();
+          
+          // echo $this->db->last_query();
+          if ($query->num_rows() > 0) {
+              $json = array();
+              $json = $query->result_array();
+              // print_r($json);
+              foreach ($json as $profile) {
+                  $token = $profile['firebase_token']; // Access firebase_token
+                    if($profile['notifydate']!=date('Y-m-d')){
+                        $this->sendPushNotification($token, 'Happy Nikah', 'Upload your profile picture to make a lasting impression!', $data['user_id'], '7');
+                        if ( $profile['staff_id'] != 0 && $profile['staff_id'] != '' &&    $profile['staff_id'] != null) {
+                          $this->AddNotificationStaff($profile['staff_id'],$profile['id'], "Profile Image is Not Uploaded"); //photo request
+                        }
+                        $upparr=array();
+                        $upparr['notifydate'] = date('Y-m-d');
+                        $this->db->where("id",$profile['id']);
+                        $this->db->update("tbl_registration", $upparr);
+                    }
+                  
+              }
+          }
+
+    }
+     // SEND NOTIFICATION WHEN USER PAYMENT VALIDITY BEFORE TWO DAYS
+    public function PaymentValidityCheck(){
+        error_reporting(0);
+        ini_set('display_errors', '1');
+        $mode = $_GET['mode'];
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+          $this->db->select("r.id,r.photo,t.firebase_token,r.staff_id,r.notifydate,r.notifydatepay,p.expiry_date,case when ifnull(p.user_id,0)!=0 then 1 else 0 end premium");
+          $this->db->from("tbl_registration r");
+          $this->db->join("tbl_firebase_token t", "r.id=t.user_id", "left");
+          $this->db->join("tbl_payement p", "r.id=p.user_id and p.expiry_date>CURDATE() and p.status=1", "left");
+          $this->db->where("r.status!=", 3);
+          $this->db->where("t.firebase_token!=", '');
+          $this->db->where("t.firebase_token IS NOT NULL");
+        //   $this->db->where("r.id", 36030);
+          $this->db->where("r.id", $data['sender_id']);
+          $this->db->group_by("r.id");
+          $query = $this->db->get();
+          
+          // echo $this->db->last_query();
+          if ($query->num_rows() > 0) {
+              $json = array();
+              $json = $query->result_array();
+              // print_r($json);
+              foreach ($json as $profile) {
+                  $token = $profile['firebase_token']; // Access firebase_token
+                    if($profile['notifydatepay']!=date('Y-m-d') && (trim($profile['expiry_date']) == date('Y-m-d', strtotime('+2 days'))) && $profile['premium']!=0){
+                        $this->sendPushNotification($token, 'Happy Nikah', 'Your Plan is Expire Soon!', $data['user_id'], '7');
+                        if ( $profile['staff_id'] != 0 && $profile['staff_id'] != '' &&    $profile['staff_id'] != null) {
+                          $this->AddNotificationStaff($profile['staff_id'],$profile['id'], "Plan is Expire Soon!"); //photo request
+                        }
+                        $upparr=array();
+                        $upparr['notifydatepay'] = date('Y-m-d');
+                        $this->db->where("id",$profile['id']);
+                        $this->db->update("tbl_registration", $upparr);
+                    }
+                  
+              }
+          }
+
+    }
+     // SEND NOTIFICATION WHEN USER NOT PAYMENT 
+    public function PaymentCheck(){
+        error_reporting(0);
+        ini_set('display_errors', '1');
+        $mode = $_GET['mode'];
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+          $this->db->select("r.id,r.photo,t.firebase_token,r.staff_id,r.notifydate,r.notifydatepay,p.expiry_date,case when ifnull(p.user_id,0)!=0 then 1 else 0 end premium");
+          $this->db->from("tbl_registration r");
+          $this->db->join("tbl_firebase_token t", "r.id=t.user_id", "left");
+          $this->db->join("tbl_payement p", "r.id=p.user_id and p.expiry_date>CURDATE() and p.status!=0", "left");
+          $this->db->where("r.status!=", 3);
+          $this->db->where("t.firebase_token!=", '');
+          $this->db->where("t.firebase_token IS NOT NULL");
+        //   $this->db->where("r.id", 36030);
+          $this->db->where("r.id", $data['sender_id']);
+          $this->db->group_by("r.id");
+          $query = $this->db->get();
+          
+          // echo $this->db->last_query();
+          if ($query->num_rows() > 0) {
+              $json = array();
+              $json = $query->result_array();
+              // print_r($json);
+              foreach ($json as $profile) {
+                  $token = $profile['firebase_token']; // Access firebase_token
+                    if($profile['notifynotpaydate']!=date('Y-m-d') && ($profile['premium'] == 0)){
+                        $this->sendPushNotification($token, 'Happy Nikah', 'Go Premium and shine brighter! ✨ Get more eyes on your profile now!', $data['user_id'], '7');
+                        // if ( $profile['staff_id'] != 0 && $profile['staff_id'] != '' &&    $profile['staff_id'] != null) {
+                        //   $this->AddNotificationStaff($profile['staff_id'],$profile['id'], "Plan is Expire Soon!"); //photo request
+                        // }
+                        $upparr=array();
+                        $upparr['notifynotpaydate'] = date('Y-m-d');
+                        $this->db->where("id",$profile['id']);
+                        $this->db->update("tbl_registration", $upparr);
+                    }
+                  
+              }
+          }
+
+    }
+    private function AddNotificationStaff($empid, $userid, $message)
+    {
+        $updatearr = array();
+        $updatearr["date"] = date("Y-m-d");
+        $updatearr["message"] = $message;
+        $updatearr['empid'] = $empid;
+        $updatearr['user_id'] = $userid;
+        $updatearr['status'] = 1;
+        $this->db->select("*");
+        $this->db->from("tbl_staffnotification");
+        $this->db->where("empid",$empid);
+        $this->db->where("message!=",$message);
+        $this->db->where("user_id",$userid);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            $json = array();
+            $json = $query->row_array();
+            $updatearray=array();
+            $updatearray['status'] = 1;
+            $updatearray["date"] = date("Y-m-d");
+            $this->db->where("id",$json['id']);
+            $this->db->update("tbl_staffnotification",$updatearray);
+        }else{
+            $res =  $this->db->insert("tbl_staffnotification", $updatearr);
+        }
+        
+        return $res;
     }
 
     public function RetrieveData()
@@ -4788,6 +4951,7 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
             $this->db->where("r.id!=" . $id);
             $this->db->where("r.status!=", 3);
             $this->db->where("n.status!=", 3);
+            $this->db->where("n.notification_type!=", 7);
             $this->db->where("r.gender", $gender);
             $this->db->order_by("n.date desc");
             //$this->db->limit($limit);
@@ -4860,7 +5024,17 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
         } else if ($mode == 14) {
             $loadedids = (isset($data['selected_id']) || $data['selected_id'] != "") ? $data['selected_id'] : [];
             $loadedids = '(' . implode(', ', $loadedids) . ')';
-            return $this->MatchingProfileLazyLoad($id, 10, $profid, $loadedids);
+            $m = (isset($_GET['m']) ? $_GET['m'] : 0);
+            $this->PhotochecktoNotify();
+            $this->PaymentValidityCheck();
+            $this->PaymentCheck();
+            if($m == 19){
+
+                return $this->Explore($id,$m=19?4:null);
+            }else{
+                return $this->MatchingProfileLazyLoad($id, 10, $profid, $loadedids);
+
+            }
         } else if ($mode == 15) {
             $_GET["mode"] = $profid;
 
@@ -5353,6 +5527,7 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
     
             // Execute the request and capture the response
@@ -5826,6 +6001,7 @@ o.partner_familytype ,o.partner_expectation,ul.is_online");
             array("id" => 18, "value" => "Top Profiles"),
             array("id" => 16, "value" => "Location"),
             array("id" => 17, "value" => "Profession"),
+            array("id" => 19, "value" => "ShortListed"),
         ];
 
         return json_encode($json);
